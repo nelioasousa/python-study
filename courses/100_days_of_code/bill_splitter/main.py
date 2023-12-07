@@ -1,4 +1,32 @@
-"""Split bill tool."""
+"""Split a bill among a group of debtors.
+
+Intended to be used as a script. Do not take command line arguments.
+All the data required for the tool to run must be user-supplied in a
+interactive fashion after the script has been executed.
+
+Requested data:
+- Bill value:
+    The value of the bill in dollars, which is rounded to 2 decimal
+    places.
+- Debtors names:
+    Name/alias/nickname of each debtor (person that must pay a portion
+    of the bill). At least two names must be supplied. Numbers are not
+    allowed as names.
+- Debtors payments:
+    If the bill was already paid (partially or fully), the user can tell
+    how much each one paid. With this data the tool can handle not only
+    how much each must pay, but also the values that must be exchanged 
+    between the debtors to level the payment accordingly, the values
+    that must be paid to close the bill (in case of partially paid 
+    bills), and the change (in case of payments that exceed the bill 
+    value).
+- Split weights:
+    A value/number that works as a weight to base the bill split.
+    Debtors that are associated with a bigger weight must pay more in
+    relation to debtors that are associated with a lesser weight.
+
+Script uses pattern matching, available only with Python >= 3.10.
+"""
 
 from enum import Enum
 from typing import Any, Callable
@@ -8,6 +36,7 @@ from random import randrange
 
 
 class Command(Enum):
+    """Enumerate commands available to the user."""
     HELP = 0
     CONTINUE = 1
     RESTART = 2
@@ -16,6 +45,21 @@ class Command(Enum):
 
 
 def asker(handler: Callable[[str], Any]) -> Callable[[str], Command | Any]:
+    """Wrap user-input handle function into a user-input function.
+
+    ARGUMENTS:
+    handler `Callable[[str], Any]` -- A callable/function object that
+    accepts a string parameter representing the user inputed data and
+    process it according to unkwon internal rules.
+
+    RETURN VALUE:
+    `Callable[[str], Command | Any]` -- A function instance that
+    requires a string argument representing the data inputted by the
+    user. The returned function returns a `Command` enum member when the
+    `get_command()` matchs the input with a available command. When no
+    match is found, the return type can be `Any`, as it depends on the
+    supplied `handler`.
+    """
     def ask(request_message: str) -> Command | Any:
         response = input(request_message)
         command = get_command(response)
@@ -23,6 +67,15 @@ def asker(handler: Callable[[str], Any]) -> Callable[[str], Command | Any]:
     return ask
 
 def get_command(response: str) -> Command | None:
+    """Try match `response` string to a `Command` enum member.
+    
+    ARGUMENTS:
+    response `str` -- The string to be matched.
+
+    RETURN VALUE:
+    `Command | None` -- Return a `Command` enum member if a match is
+    found, otherwise returns `None`.
+    """
     match response.strip().lower():
         case 'help' | '?':
             return Command.HELP
@@ -37,6 +90,15 @@ def get_command(response: str) -> Command | None:
 
 @asker
 def ask_bill_value(response: str) -> float | str:
+    """Try decode response to a monetary value.
+    
+    ARGUMENTS:
+    response `str` -- A string to be decoded to a float value.
+    
+    RETURN VALUE:
+    `float | str` -- Return a float if decode is successful or a string
+    error message otherwise.
+    """
     try:
         bill_value = round(float(response), 2)
     except ValueError:
@@ -47,6 +109,15 @@ def ask_bill_value(response: str) -> float | str:
 
 @asker
 def ask_values(response: str) -> list[float] | str:
+    """Try decode response to a list of float values.
+    
+    ARGUMENTS:
+    response `str` -- A string to be decoded to a list of floats.
+    
+    RETURN VALUE:
+    `list[str] | str` -- Returns a list of float values if decode is
+    successful or a string error message otherwise.
+    """
     str_values = response.split(',')
     values, fails = [], []
     for str_value in str_values:
@@ -61,6 +132,19 @@ def ask_values(response: str) -> list[float] | str:
 
 @asker
 def ask_names(response: str) -> list[str] | str:
+    """Try decode response to a list of people's names.
+
+    Numbers aren't allowed as names. This is implemented with a call to
+    float(), where a valid name passed as argument raises a ValueError.
+    
+    ARGUMENTS:
+    response `str` -- A string to be decoded to a list of strings.
+    
+    RETURN VALUE:
+    `list[str] | str` -- A list of string values representing people's
+    names if all names are valid or a string error message if at least
+    one name is invalid.
+    """
     names = [process_name(name) for name in response.split(',')]
     fails = []
     for name in names:
@@ -74,6 +158,7 @@ def ask_names(response: str) -> list[str] | str:
     return names
 
 def process_name(name: str):
+    """Format a person name."""
     from re import sub
     # Replace multiple whitespaces with a single space character
     # Also capitalize the name portions
@@ -87,11 +172,25 @@ def process_name(name: str):
     return name
 
 def upper_first_char(string: str):
+    """Upper case the first character only."""
     return ''.join((string[0].upper(), string[1:]))
 
 
 
-def split_bill(data: dict) -> dict[str, list]:
+def split_bill(data: dict) -> dict[str, list[(str, float)]]:
+    """Split a bill represented by the data dictionary.
+    
+    ARGUMENTS:
+    data `dict` -- A dictionary containing the bill data collected from
+    the user.
+
+    RETURN VALUE:
+    `dict[str, list[(str, float)]]` -- A dictionary where keys are
+    strings representing the debtors names and values are lists of
+    lenght-2 tuples, where the first element of the tuples are strings
+    and the second are floats representing the creditor name and the
+    value owned by the debtor to the creditor respectively.
+    """
     group = data['names']
     bill_value = data['bill']
     payments = data['paid']
@@ -134,10 +233,18 @@ def split_bill(data: dict) -> dict[str, list]:
 
 
 def clear_terminal():
+    """Clear the terminal."""
     import os
     os.system('cls' if os.name == 'nt' else 'clear')
 
 def att_screen(data: dict, info: str = ''):
+    """"Print the data supplied by the user interactively.
+    
+    ARGUMENTS:
+    data `dict` -- Dictionary containing the user supplied data;
+    info `str` -- String message to print after `data` been printed to
+    screen.
+    """
     clear_terminal()
     print('BILL SPLITTER TOOL')
     print('by github.com/nelioasousa', end='\n\n')
@@ -176,6 +283,12 @@ def att_screen(data: dict, info: str = ''):
         print('[MESSAGE]', info, end='\n\n')
 
 def show_split_result(split_result: dict[str, list]):
+    """Format and print the split result dictionary.
+    
+    ARGUMENTS:
+    split_result `dict[str, list[(str, float)]]` -- Bill split result
+    returned by calling `split_bill()` with the user-supplied data.
+    """
     if 'CHANGE' in split_result:
         for name, value in split_result['CHANGE']:
             print('- %s gets a change of $%.2f' %(name, value))
@@ -192,6 +305,7 @@ def show_split_result(split_result: dict[str, list]):
 
 
 def restart_or_terminate():
+    """Ask the user if they want to restart the script."""
     response = input('[R]estart? ').strip().lower()
     if response in {'y', 'yes', 'r', 'restart'}:
         return main
@@ -199,6 +313,7 @@ def restart_or_terminate():
         return terminate
 
 def terminate():
+    """Script end screen."""
     clear_terminal()
     print('Tranks for using the tool! Goodbye!')
     print('More in github.com/nelioasousa/python-study')
@@ -313,7 +428,7 @@ def main():
     data['target'] = [round(data['bill'] * p, 2) \
                       for p in data['weights']]
     # To evade the inaccuracy bring by round()
-    # One unlucky one will take on the difference
+    # An unlucky one will take on the difference
     unlucky = randrange(0, len(data['names']))
     data['target'][unlucky] = 0.0
     data['target'][unlucky] = data['bill'] - sum(data['target'])
