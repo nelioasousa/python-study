@@ -1,13 +1,15 @@
+Self-documented script. Check [main.py](./main.py) for more details.
+
 # Description
 Hangman game.
 
+Users must populate the game with valid words/phrases. Phrases are considered valid if they consist of pure ASCII characters, don't contain numbers, and include only the `!?',.-` punctuations. The phrases are saved in the [bank.json](./bank.json) file (which must be in the same directory as the script). The game menu have two main options: "play" and "bank of phrases". The "bank of phrases" option includes a command interface to show, hide, add, and remove phrases from the JSON bank.
+
 Programming paradigm used: Functional Programming.
 
-# Planning
-## Input
-User must populate the game with words. The words will be saved in a .txt file in the same directory as the script. The game menu will have two main options: "play" and "words". The "words" options will have a command interface to see, add and remove words from the .txt bank.
+# Planning pseudocode
+The "pseudocode" below does not represent the exact structure of the script. It was used as the basis of the source code but was changed as the project progressed to address difficulties and unforeseen problems.
 
-## Pseudocode
 ```
 def exit_to_menu(func):
     def wrapper(*args, **kwargs):
@@ -103,3 +105,9 @@ def main():
             case Menu.EXIT:
                 return terminate()
 ```
+
+# Notes
+1. Initially the idea was to increase/decrease the number of lives according to the chosen difficulty, but the gallow and hanging man drawings from the `show_hangman()` function were getting sloppy. A fixed six lives were chosen to align with the number of body parts in the basic drawing (head, arms, torso, and legs);
+2. Once again, the [Structural Pattern Matching](https://peps.python.org/pep-0636/) was used, limiting the versions of Python compatible with the script;
+3. The `main()` function is cleaner compared to the one in the [bill splitter project](../bill_splitter/main.py);
+4. I especially like the `KeyboardInterrupt` exception handling.
