@@ -1,10 +1,37 @@
+"""Hangman game for command line console/terminal.
+
+Intended to be used as a script. Do not take command line arguments.
+When running, user is presented with two options: play and bank of 
+phrases. The first is to run the hangman game. The second is to the
+user manage the words and phrases to be played with.
+
+The user also can populate the `bank.json` file manually, outside the 
+"bank of phrases" enviroment, but it isn't recommended since they can 
+add invalid entries. The script won't run until all invalid phrases 
+are removed from the file. When adding phrases manually, the 
+difficulty is determined by the user.
+
+Script uses pattern matching, available only with Python >= 3.10.
+"""
+
 import string
 from enum import Enum
-from typing import Any, Literal, Union
+from typing import Literal, Union
 from random import choice
 
 
 def play(phrases_bank: dict[str, list[str]]) -> bool:
+    """Run the hangman game in the terminal.
+    
+    ARGUMENTS:
+    phrases_bank `dict[str, list[str]]` -- A dictionary where the keys 
+    are strings representing the difficulty (easy, normal or hard) and 
+    the values are lists of strings representing the words and phrases 
+    available to the user play with.
+
+    RETURN VALUE:
+    `bool` -- A boolean value informing if the game runned normally.
+    """
     try:
         if not phrases_bank: return False
         difficulty = ask_difficulty(phrases_bank)
@@ -55,6 +82,22 @@ def play(phrases_bank: dict[str, list[str]]) -> bool:
 def ask_difficulty(
         phrases_bank: dict[str, list[str]]
         ) -> Literal['easy', 'normal', 'hard']:
+    """Ask the user to choose the game difficulty.
+    
+    ARGUMENTS:
+    phrases_bank `dict[str, list[str]]` -- A dictionary where the keys 
+    are strings representing the difficulty (easy, normal or hard) and 
+    the values are lists of strings representing the words and phrases 
+    available to the user play with.
+    
+    RETURN VALUE:
+    `Literal['easy', 'normal', 'hard']` -- The game difficulty choosed 
+    by the user.
+
+    EXCEPTIONS RAISED:
+    `KeyboardInterrupt` -- When the user chooses the EXIT option 
+    instead of selecting a difficulty.
+    """
     while True:
         clear_terminal()
         print('Choose the difficulty', end='\n\n')
@@ -75,6 +118,7 @@ def ask_difficulty(
 def sorted_phrases_bank(
         phrases_bank: dict[str, list[str]]
         ) -> dict[str, list[str]]:
+    """Builds a new `phrases_bank` sorted by key (difficulty)."""
     def key_sorter(key_value_pair):
         match key_value_pair[0]:
             case 'easy': return 0
@@ -90,6 +134,7 @@ def clear_terminal():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 def show_hangman(num_lives: Literal[0, 1, 2, 3, 4, 5, 6]):
+    """Show the gallows and the hanging man according to life count."""
     hangmans = (
 """ +---+
  |   |
@@ -137,6 +182,7 @@ _____| Lives: 6/6"""
     print(hangmans[num_lives], end='\n\n')
 
 def show_phrase_board(phrase: str, guessed_letters: set[str]):
+    """Reveals the `phrase` according to the `guessed_letters`."""
     board = []
     for char in phrase:
         if char in guessed_letters or char in " !?,'.-":
@@ -145,33 +191,44 @@ def show_phrase_board(phrase: str, guessed_letters: set[str]):
             board.append('_')
     print(''.join(board), end='\n\n')
 
-def check_phrase(phrase: Any) -> Literal[False] | str:
-    try:
-        if not phrase.isascii():  # Only ASCII characters
-            return False
-    except AttributeError:  # Isn't a string
-        return False
+def check_phrase(phrase: str) -> Union[Literal[False], str]:
+    """Check `phrase` validity based on some criteria.
+    
+    `phrase` is considered valid if it is constituted of pure ASCII 
+    characters, don't contain numbers, and contain only "!?,'.-" 
+    punctuations. Valid entries are returned after being put in lower 
+    case and have consecutive whitespaces removed. `False` is returned 
+    when a invalid `phrase` is encontered. 
+
+    ARGUMENTS:
+    phrase `str` -- String to be checked.
+
+    RETURN VALUE:
+    `Union[Literal[False], str]` -- `False` if `phrase` is invalid or 
+    `str` otherwise.
+    """
+    # Only ASCII characters
+    if not phrase.isascii(): return False
     # Lower case and space char instead of whitespaces
     phrase = ' '.join(phrase.lower().split())
-    if not phrase:  # Catch empty strings (just whitespaces)
-        return False
+    # Catch empty strings (just whitespaces)
+    if not phrase: return False
     word_chars = frozenset(phrase)  # frozenset is more efficient
     puncts = frozenset(string.punctuation).intersection(word_chars)
     # Only "!?,'.-" punctuations are allowed
-    if not puncts <= {'!', '?', '-', ',', '.', "'"}:
-        return False
+    if not puncts <= {'!', '?', '-', ',', '.', "'"}: return False
     # Numbers are not allowed in the phrase
-    if frozenset(string.digits).intersection(word_chars):
-        return False
+    if frozenset(string.digits).intersection(word_chars): return False
     return phrase
 
 
 
 def bank(phrases_bank: dict[str, list[str]]):
+    """Bank of phrases handler."""
     try:
         show_phrases, info = False, None
         while True:
-            bank_screen(phrases_bank, show_phrases)
+            phrases_display(phrases_bank, show_phrases)
             command, arg = ask_command(info)
             match command:
                 case BankCommand.SHOW_PHRASES:
@@ -205,6 +262,7 @@ def bank(phrases_bank: dict[str, list[str]]):
         return
 
 class BankCommand(Enum):
+    """Enumerate commands available inside the bank of phrases."""
     SHOW_PHRASES = 0
     HIDE_PHRASES = 1
     ADD_PHRASE = 2
@@ -212,7 +270,8 @@ class BankCommand(Enum):
     MENU = 4
     ERROR = 5
 
-def bank_screen(phrases_bank: dict[str, list[str]], show_phrases: bool):
+def phrases_display(phrases_bank: dict[str, list[str]], show_phrases: bool):
+    """Handle the phrases display inside the bank of phrases."""
     clear_terminal()
     print('REGISTERED WORDS/PHRASES', end='\n\n')
     if not phrases_bank:
@@ -230,6 +289,7 @@ def bank_screen(phrases_bank: dict[str, list[str]], show_phrases: bool):
 def ask_command(
         info: Union[str, None] = None
         ) -> tuple[BankCommand, Union[str, None]]:
+    """Handle the command screen inside the bank of phrases."""
     print('AVAILABLE COMMANDS:')
     print('  show')
     print('  hide')
@@ -261,7 +321,22 @@ def ask_command(
 
 def add_phrase(
         phrases_bank: dict[str, list[str]], phrase: str
-        ) -> Union[str, Literal[False]]:
+        ) -> Union[Literal[False], str]:
+    """Handle the "add" command in the bank of phrases.
+    
+    ARGUMENTS:
+    phrases_bank `dict[str, list[str]]` -- A dictionary where the keys 
+    are strings representing the difficulty (easy, normal or hard) and 
+    the values are lists of strings representing the words and phrases 
+    available to the user play with.
+
+    phrase `str` -- String to be added to `phrases_bank`.
+
+    RETURN VALUE:
+    `Union[Literal[False], str]` -- Returns `False` if `phrase` can't 
+    be added to `phrases_bank` or a `str` representing the processed 
+    `phrase` added to `phrases_bank` otherwise.
+    """
     phrase = check_phrase(phrase)
     if not phrase: return False
     if len(phrase) < 2: return False
@@ -274,6 +349,7 @@ def add_phrase(
     return phrase
 
 def phrase_exists(phrases_bank: dict[str, list[str]], phrase: str):
+    """Checks if `phrase` exists inside `phrases_bank`."""
     for phrases in phrases_bank.values():
         if phrase in phrases:
             return True
@@ -282,6 +358,21 @@ def phrase_exists(phrases_bank: dict[str, list[str]], phrase: str):
 def rmv_phrase(
         phrases_bank: dict[str, list[str]], phrase: str
         ) -> Union[str, Literal[False]]:
+    """Handle the "rmv" command in the bank of phrases.
+    
+    ARGUMENTS:
+    phrases_bank `dict[str, list[str]]` -- A dictionary where the keys 
+    are strings representing the difficulty (easy, normal or hard) and 
+    the values are lists of strings representing the words and phrases 
+    available to the user play with.
+
+    phrase `str` -- String to be removed from `phrases_bank`.
+
+    RETURN VALUE:
+    `Union[Literal[False], str]` -- Returns `False` if `phrase` wasn't 
+    found inside `phrases_bank` or a `str` representing the removed 
+    phrase.
+    """
     phrase = check_phrase(phrase)
     if not phrase: return False
     for difficulty, phrases in phrases_bank.items():
@@ -295,6 +386,7 @@ def rmv_phrase(
     return False
 
 def save_phrases(phrases_bank: dict[str, list[str]]):
+    """Save `phrases_bank` in memory as a JSON file."""
     from json import dump
     with open('./bank.json', mode='w') as json_bank:
         dump(sorted_phrases_bank(phrases_bank), json_bank, ensure_ascii=True)
@@ -302,6 +394,7 @@ def save_phrases(phrases_bank: dict[str, list[str]]):
 
 
 def menu(info: Union[str, None] = None):
+    """Handle the menu."""
     while True:
         menu_screen(info)
         match input('Select: ').strip().lower():
@@ -315,11 +408,13 @@ def menu(info: Union[str, None] = None):
                 info = 'Invalid option.'
 
 class MenuCommand(Enum):
+    """Enumerate commands available to the user inside the menu."""
     PLAY = 0
     BANK = 1
     EXIT = 2
 
 def menu_screen(info: Union[str, None] = None):
+    """Display the menu screen."""
     clear_terminal()
     print('(x_x) HANGMAN GAME (x_x)', end='\n\n')
     print('[P] PLAY\n[B] BANK OF PHRASES\n[X] EXIT', end='\n\n')
@@ -344,6 +439,7 @@ def main():
                 return terminate()
 
 def load_phrases_bank() -> dict[str, list[str]]:
+    """Load the bank.json file while checking its validity."""
     from json import load
     def not_allowed(str_to_decode: str):
         raise ValueError('Invalid value: %s' %str_to_decode)
