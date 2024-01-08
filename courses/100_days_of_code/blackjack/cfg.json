@@ -4,8 +4,8 @@
     "max_num_hands": 1,
     "hit_soft_17": true,
     "double_after_splits": false,
-    "split_in_aces": false,
     "restrict_double": true,
+    "enable_split_in_aces": false,
     "enable_surrender": false,
     "enable_hole_card": true
 }
