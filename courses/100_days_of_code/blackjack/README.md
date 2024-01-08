@@ -1,3 +1,5 @@
+Self-documented script. Check [main.py](./main.py) for more details.
+
 # Description
 Blackjack game in the console.
 
@@ -13,13 +15,15 @@ Implementation of casino blackjack game (or 21/Twenty-One). The user will be abl
 7. Allow double after split;
 8. Double in 9/10/11 only.
 
+To change those rules, the user must edit the [cfg.json](./cfg.json) file.
+
 Fixed rules:
-1. Player's cards are dealt face up (Dealer can see them);
-2. The Dealer only makes his move after the Player ends all their hands;
-3. Dealer must hit until a total of 17 or higher;
-4. The Dealer pays 100% of the bets in the winning hands;
-5. The Dealer returns 50% of the bets in hands that have been surrendered;
-6. Can't double the bet in a blackjack hand.
+1. The Dealer only makes his move after the Player ends all their hands;
+2. Dealer must hit until a total of 17 or higher;
+3. The Dealer pays 100% of the bets in the winning hands;
+4. The Dealer returns 50% of the bets in hands that have been surrendered;
+5. Cannot double or surrender a Twenty-One hand;
+6. When spliting a hand, the same bet of the original hand is placed in the new hand.
 
 # Planning
 ## Game steps
@@ -34,12 +38,14 @@ The game can be simplified in:
 8. Ask for another round if the player still has money.
 
 ## Pseudocode
+The "pseudocode" below does not represent the exact structure of the script. It was used as the basis of the source code but may have changed as the project progressed to address difficulties and unforeseen problems.
+
 ```
 # See https://stackoverflow.com/q/51671699/16969525
 Card = namedtuple('Card', ['rank', 'suit'])
 
 
-class DrawPile()
+class DrawPile():
 
     def __init__(self, num_decks):
         ...
@@ -181,3 +187,12 @@ def main():
             case _:
                 continue
 ```
+
+# Notes
+1. Don't like much the `set_as_blackjack()` method in `Hand()` class. Maybe I will fix this later;
+2. `play(...)` function is quite extensive and nested, but it gets the job done;
+3. `match` statement once more showing his face and limiting the versions of Python compatible with the script;
+4. I especially like the `min_total()`, `max_total()`, and `best_value()` methods of the `Hand()` class, even though they are simple and don't have names that match (I could easily change the names, but I'll keep them as they are);
+5. `table_screen()` function is also a bit confusing;
+6. If I had used a class instead of a namedtuple for `Card()`, `card_repr()` would be a instance method, but I chose simplicity since it's a simple data structure;
+7. I also like the way the [cfg.jon](./cfg.json) file is handled.
