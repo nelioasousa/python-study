@@ -39,3 +39,21 @@ List of features for the app.
 9. _Progress tracking_
 
 > Display user progress, like number of reviewd cards, performance over time, and others.
+
+# Planning
+The app will implement something similar to the MVC architecture. After the implementation, further readings about the MVC architectural pattern will be done. I may come back to the project later to point out errors in the implementation, suggest improvements, and identify aspects that deviate from the general MVC pattern.
+
+## Data model
+The app data will be handled as the following:
+- `Card` class, which instances will store the cards data;
+- The `Card` class will implement basically getters and setters;
+- `Project` class, which instances will store the project data and associated `Card` instances;
+- The priority score calculation, cards filtering, and revision mode (priority or quiz mode) will be implemented inside the `Project` class;
+- `Project` instances will have methods to return its progress metrics;
+- Each `Project` instance will be associated with a individual `<ProjectName>.json` file and will implement methods to update/save the data locally;
+
+## View
+The app layout is sketched in [app_layout.png](./app_layout.png). Each color represents a group of widgets that will be somewhat independent of each other but related. Each group will implement its own update functionality and generate virtual events related to changes in the widgets within. All groups will be packed inside a `Screen` class and organized within the main window. Since there is still little experience with the tool, not much planning will be done; it will be implemented in a more experimental way.
+
+## Controller
+Similarly to the View, little planning will be done for the Controller, and the problem will be approached in an experimental way. The Controller will essentially manage how to handle the generated events, calling the update methods within the `Screen` class.
