@@ -1,0 +1,44 @@
+# Python readings
+Mapping Python readings.
+
+## Code documentation
+About code documentation, self-documenting code, clean code, and others.
+
+| Description | Recommendation (1-5) |
+| :---        | :---                 |
+| [PEP 0008 - Style Guide for Python Code](https://peps.python.org/pep-0008/) | 5 |
+| [PEP 0257 - Docstring Conventions](https://peps.python.org/pep-0257/) | 3 |
+| [PEP 0482 - Literature Overview for Type Hints](https://peps.python.org/pep-0482/) | 1 |
+| [PEP 0483 - The Theory of Type Hints](https://peps.python.org/pep-0483/) | 3 |
+| [PEP 0484 - Type Hints](https://peps.python.org/pep-0484/) |  |
+| [PEP 0526 - Syntax for Variable Annotations](https://peps.python.org/pep-0526/) |  |
+
+## Standard library - Development Tools
+Focus is on the typing and unittest modules.
+
+| Description | Recommendation (1-5) |
+| :---        | :---                 |
+| [typing - Support for type hints](https://docs.python.org/3/library/typing.html) |  |
+| [unittest — Unit testing framework](https://docs.python.org/3/library/unittest.html) |  |
+
+## Python statements
+Python simple and compound statements in depth. Focus is on `assert`, `yield`, `import`, `try`, `with`, `match`, and Coroutines.
+
+| Description | Recommendation (1-5) |
+| :---        | :---                 |
+| [PEP 0636 - Structural Pattern Matching: Tutorial](https://peps.python.org/pep-0636/) | 5 |
+| [PEP 0634 - Structural Pattern Matching: Specification](https://peps.python.org/pep-0634/) | 3 |
+| [PEP 0635 - Structural Pattern Matching: Motivation and Rationale](https://peps.python.org/pep-0635/) |  |
+| [Python Reference - The with statement](https://docs.python.org/3/reference/compound_stmts.html#the-with-statement) |  |
+| [PEP 0343 – The “with” Statement](https://peps.python.org/pep-0343/) |  |
+| [Python Reference - The try statement](https://docs.python.org/3/reference/compound_stmts.html#the-try-statement) |  |
+
+## OOP
+| Description | Recommendation (1-5) |
+| :---        | :---                 |
+| [0557 - Data Classes](https://peps.python.org/pep-0557/) |  |
+
+## Others
+| Description | Recommendation (1-5) |
+| :---        | :---                 |
+| [PEP 0485 - A Function for testing approximate equality](https://peps.python.org/pep-0485/) | 1 |
