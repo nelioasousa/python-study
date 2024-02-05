@@ -10,7 +10,7 @@ About code documentation, self-documenting code, clean code, and others.
 | [PEP 0257 - Docstring Conventions](https://peps.python.org/pep-0257/) | 3 |
 | [PEP 0482 - Literature Overview for Type Hints](https://peps.python.org/pep-0482/) | 1 |
 | [PEP 0483 - The Theory of Type Hints](https://peps.python.org/pep-0483/) | 3 |
-| [PEP 0484 - Type Hints](https://peps.python.org/pep-0484/) |  |
+| [PEP 0484 - Type Hints](https://peps.python.org/pep-0484/) | 3 |
 | [PEP 0526 - Syntax for Variable Annotations](https://peps.python.org/pep-0526/) |  |
 
 ## Standard library - Development Tools
