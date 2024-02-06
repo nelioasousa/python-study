@@ -36,9 +36,10 @@ Python simple and compound statements in depth. Focus is on `assert`, `yield`, `
 ## OOP
 | Description | Recommendation (1-5) |
 | :---        | :---                 |
+| [What are metaclasses in Python?](https://stackoverflow.com/q/100003) | 4 |
+| [PEP 3115 - Metaclasses in Python 3000](https://peps.python.org/pep-3115/) | 4 |
 | [PEP 0557 - Data Classes](https://peps.python.org/pep-0557/) |  |
 | [PEP 3141 - A Type Hierarchy for Numbers](https://peps.python.org/pep-3141/) |  |
-| [What are metaclasses in Python?](https://stackoverflow.com/q/100003) |  |
 
 ## Data validation
 | Description | Recommendation (1-5) |
