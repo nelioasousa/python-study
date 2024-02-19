@@ -1,8 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 
-from model import valid_project_name
-
 # Projects section:
 #   Functionality:
 #     List all projects
@@ -25,72 +23,6 @@ from model import valid_project_name
 #     Delete project > Confirmation pop-up
 #     Delete project > No working project after
 #     Project selection > Updates all other sections
-#
-# Cards section:
-#   Functionality:
-#     List cards
-#     Cards filter (Single filtering | No multi filtering)
-#     Create card
-#     Remove working card
-#     Select new working card
-#     Score cards by priority
-#   Widgets:
-#     Section static label
-#     Button to create card
-#     Combobox for filter category
-#     Combobox for filter value
-#     Button to delete working card
-#   Behaviors:
-#     Card selection update only card screen section
-#     Card deletion loads next card
-#     Filter cards only after return press
-#     Card add, delete, review, and learning > New progress 
-#     New progress > Updates progress section
-#
-# Progress section:
-#   Functionality:
-#     Learned percentage
-#     Last studied
-#     Number of cards reviewed today
-#     Number of cards learned today
-#   Widgets:
-#     Static labels for descriptions
-#     Var labels for progress informations
-#   Behaviors:
-#     None
-#
-# Card screen section:
-#   Functionality:
-#     Flip card
-#     Edit card
-#     Set card as learned
-#     Set card as not learned
-#     Next card
-#   Widgets:
-#     Button to set card as learned
-#     Button to set card as not learned
-#     Card screen
-#       Label to indicate side
-#       Label for text
-#       Label for image
-#       Button to flip card
-#       Button to edit card
-#   Behaviors:
-#     Button to set/unset disabled until first flip
-#     Edit button disabled until first flip
-#     Next card only using set/unset button
-#
-# Configuration section:
-#   Functionality:
-#     Change priority scoring
-#     Set normal/quiz mode
-#   Widgets:
-#     Entries for setting variables weights
-#     Labels describing variables
-#     Checkbutton to set quiz mode
-#   Behaviors:
-#     Setting quiz mode changes next card functionality
-#     Changing weights recalculates cards priority scores
 
 
 VEV_PROJ_SET = '<<ProjectSet>>'
@@ -98,9 +30,6 @@ VEV_PROJ_ENTRY_CREATE = '<<ProjectEntryCreate>>'
 VEV_PROJ_POPUP_CREATE = '<<ProjectPopupCreate>>'
 VEV_PROJ_DELETE = '<<ProjectDelete>>'
 
-def entry_validator(entry: str):
-    return (valid_project_name(entry)
-            and entry == ' '.join(('%s_' %entry).split())[:-1])
 
 class ProjectsSec:
 
@@ -111,11 +40,9 @@ class ProjectsSec:
         # Project selection combobox
         self._combox_entry = tk.StringVar()
         self._combox_entry.trace_add('write', self.att_buttons_state)
-        validator = (self.root.register(entry_validator), '%P')
         self.projects_combox = ttk.Combobox(
             self.frame, height=5, state='normal',
-            textvariable=self._combox_entry,
-            validate='key', validatecommand=validator)
+            textvariable=self._combox_entry)
         self.projects_combox.grid(row=0, column=1, columnspan=3)
         self.projects_combox.bind('<Return>', self.combobox_return)
         self.projects_combox.bind('<<ComboboxSelected>>',
@@ -145,6 +72,11 @@ class ProjectsSec:
             values = self._post_command()
             self.projects_combox.configure(values=values)
         self.projects_combox.configure(postcommand=post_wrapper)
+
+    def set_entry_validator(self, validate, validate_command, percent_subs):
+        validator  = (self.root.register(validate_command), *percent_subs)
+        self.projects_combox.configure(validate=validate,
+                                       validatecommand=validator)
 
     def set_working_project(self, project_name):
         if project_name in self.get_listed_projects():
