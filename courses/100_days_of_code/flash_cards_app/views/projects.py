@@ -36,14 +36,14 @@ class ProjectsSec:
     def __init__(self, root):
         self.root = root
         # Section frame
-        self.frame = ttk.Frame(root, padding=5)
+        self.frame = ttk.Frame(root)
         # Project selection combobox
         self._combox_entry = tk.StringVar()
         self._combox_entry.trace_add('write', self.att_buttons_state)
         self.projects_combox = ttk.Combobox(
             self.frame, height=5, state='normal',
             textvariable=self._combox_entry)
-        self.projects_combox.grid(row=0, column=1, columnspan=3)
+        self.projects_combox.grid(row=0, column=1, columnspan=3, sticky='we')
         self.projects_combox.bind('<Return>', self.combobox_return)
         self.projects_combox.bind('<<ComboboxSelected>>',
                                   self.combobox_selection)
@@ -51,7 +51,7 @@ class ProjectsSec:
         self.set_post_command()
         # Combobox label
         self.project_lbl = ttk.Label(
-            self.frame, text='Project:', anchor='center', padding=1, width=9)
+            self.frame, text='Project:', anchor='center', padding=1)
         self.project_lbl.grid(row=0, column=0)
         # New project button
         self.create_btn = ttk.Button(
@@ -65,6 +65,9 @@ class ProjectsSec:
         self.delete_btn.grid(
             row=1, column=2, columnspan=2,
             sticky='we', padx=(1, 0), pady=(2, 0))
+        # Resizing/Borders
+        self.frame.columnconfigure((0, 1, 2, 3), weight=1, uniform=True)
+        self.frame.configure(borderwidth=5, relief='groove')
 
     def set_post_command(self, post_command=None):
         self._post_command = tuple if post_command is None else post_command
@@ -92,26 +95,27 @@ class ProjectsSec:
             return proj_selection
         return None
 
-    def combobox_return(self, _event=None):
+    def combobox_return(self, *args):
         entry = self.get_selection()
         if entry in self.get_listed_projects():
-            root.event_generate(VEV_PROJ_SET, data=entry)
+            self.root.event_generate(VEV_PROJ_SET, data=entry)
         else:
-            root.event_generate(VEV_PROJ_ENTRY_CREATE, data=entry)
+            self.root.event_generate(VEV_PROJ_ENTRY_CREATE, data=entry)
 
-    def combobox_selection(self, _event=None):
+    def combobox_selection(self, *args):
         self.projects_combox.selection_clear()  # Clear text selection
-        root.event_generate(VEV_PROJ_SET, data=self.get_selection())
+        self.root.event_generate(VEV_PROJ_SET, data=self.get_selection())
 
     def create_project(self):
-        root.event_generate(VEV_PROJ_POPUP_CREATE)
+        self.root.event_generate(VEV_PROJ_POPUP_CREATE)
 
     def delete_project(self):
-        root.event_generate(VEV_PROJ_DELETE, data=self.get_selection())
+        self.root.event_generate(VEV_PROJ_DELETE, data=self.get_selection())
     
     def grid(self, *, row, column, rowspan=1, columnspan=1, **kwargs):
-        self.frame.grid(row=row, column=column, rowspan=rowspan,
-                        columnspan=columnspan, **kwargs)
+        self.frame.grid(row=row, column=column,
+                        rowspan=rowspan, columnspan=columnspan,
+                        **kwargs)
     
     def att_buttons_state(self, *args):
         if self.get_selection() is None:
