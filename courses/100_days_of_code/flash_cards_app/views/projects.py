@@ -61,7 +61,8 @@ class ProjectsSec:
             sticky='we', padx=(0, 1), pady=(2, 0))
         # Delete project button
         self.delete_btn = ttk.Button(
-            self.frame, text='Delete', command=self.delete_project)
+            self.frame, text='Delete',
+            command=self.delete_project, state='disabled')
         self.delete_btn.grid(
             row=1, column=2, columnspan=2,
             sticky='we', padx=(1, 0), pady=(2, 0))

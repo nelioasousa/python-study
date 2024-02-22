@@ -40,14 +40,14 @@ class CardsSec:
         self.header_lbl.grid(row=0, column=0, columnspan=2, sticky='wnes')
         # Cards tree list
         self._inner_frame = ttk.Frame(self.frame, relief='sunken', padding=5)
-        self._inner_frame.grid(row=1, column=0, columnspan=2)
+        self._inner_frame.grid(row=1, column=0, columnspan=2, sticky='ns')
         self.cards_tree_list = ttk.Treeview(
             self._inner_frame, height=15,
             selectmode='browse', columns=('score',))
         self.cards_tree_list.column('score', width=60)
         self.cards_tree_list.heading('#0', text='Name')
         self.cards_tree_list.heading('score', text='Score')
-        self.cards_tree_list.grid(row=0, column=0, columnspan=4)
+        self.cards_tree_list.grid(row=0, column=0, columnspan=4, sticky='ns')
         ## Filter category
         self.filter_categ_lbl = ttk.Label(
             self._inner_frame, text='Filter ctg.', padding=1)
@@ -95,6 +95,8 @@ class CardsSec:
         # Resizing/Borders
         self._inner_frame.columnconfigure(
             (0, 1, 2, 3), weight=1, uniform=True)
+        self._inner_frame.rowconfigure(0, weight=1)
+        self.frame.rowconfigure(1, weight=1)
         self.frame.configure(borderwidth=5, relief='groove')
 
     def insert_card(self, cid, text, score, idx='end'):
