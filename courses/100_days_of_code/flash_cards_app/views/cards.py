@@ -232,8 +232,8 @@ class CardsSec:
         self.filter_value_combox.configure(
             values=values, height=min(7, len(values)))
 
-    def grid(self, *, row, column, rowspan=1, columnspan=1, **kwargs):
-        self.frame.grid(row=row, column=column,
+    def grid(self, *, row, column, rowspan=1, columnspan=1, sticky, **kwargs):
+        self.frame.grid(row=row, column=column, sticky=sticky,
                         rowspan=rowspan, columnspan=columnspan,
                         **kwargs)
 

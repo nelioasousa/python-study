@@ -113,8 +113,8 @@ class ProjectsSec:
     def delete_project(self):
         self.root.event_generate(VEV_PROJ_DELETE, data=self.get_selection())
     
-    def grid(self, *, row, column, rowspan=1, columnspan=1, **kwargs):
-        self.frame.grid(row=row, column=column,
+    def grid(self, *, row, column, rowspan=1, columnspan=1, sticky, **kwargs):
+        self.frame.grid(row=row, column=column, sticky=sticky,
                         rowspan=rowspan, columnspan=columnspan,
                         **kwargs)
     
