@@ -43,7 +43,8 @@ class ModeSec:
         self.mode_var.set('0')
         self.root.event_generate(VEV_REVISION_MODE)
 
-    def grid(self, *, row, column, rowspan=1, columnspan=1, sticky, **kwargs):
+    def grid(self, *, row, column,
+             rowspan=1, columnspan=1, sticky='', **kwargs):
         self.frame.grid(row=row, column=column, sticky=sticky,
                         rowspan=rowspan, columnspan=columnspan,
                         **kwargs)
