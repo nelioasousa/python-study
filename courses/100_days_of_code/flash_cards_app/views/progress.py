@@ -57,7 +57,7 @@ class ProgressSec:
     def _update_progress_caption(self, *args):
         self.progress_lbl.configure(
             text='Overall progress : %s%%' %self.progress_var.get())
-    
+
     def _update_last_studied(self, *args):
         self.last_studied_lbl.configure(
             text='Last studied in : %s' %self.last_studied_var.get())
@@ -72,31 +72,26 @@ class ProgressSec:
 
     def set_progress(self, percentage):
         self.progress_var.set('%.1f' %float(percentage))
-    
+
     def set_last_studied(self, datetime_str):
         self.last_studied_var.set(datetime_str)
-    
+
     def set_todays_reviews(self, num_reviewed):
         self.reviewed_today_var.set(str(num_reviewed))
-    
+
+    def increment_todays_reviews(self, increment=1):
+        num_rv = int(self.reviewed_today_var.get())
+        self.set_todays_reviews(num_rv + increment)
+
     def set_todays_learnings(self, num_learned):
         self.learned_today_var.set(str(num_learned))
+
+    def increment_todays_learnings(self, increment=1):
+        num_lr = int(self.learned_today_var.get())
+        self.set_todays_learnings(num_lr + increment)
 
     def grid(self, *, row, column,
              rowspan=1, columnspan=1, sticky='', **kwargs):
         self.frame.grid(row=row, column=column, sticky=sticky,
                         rowspan=rowspan, columnspan=columnspan,
                         **kwargs)
-
-root = tk.Tk()
-progress = ProgressSec(root)
-progress.grid(row=0, column=0, sticky='we')
-
-root.columnconfigure(0, weight=1)
-
-progress.set_progress(78.85)
-progress.set_last_studied('02-21-2024 21:10:23.346681')
-progress.set_todays_reviews(15)
-progress.set_todays_learnings(7)
-
-root.mainloop()

@@ -48,13 +48,3 @@ class ModeSec:
         self.frame.grid(row=row, column=column, sticky=sticky,
                         rowspan=rowspan, columnspan=columnspan,
                         **kwargs)
-
-root = tk.Tk()
-mode = ModeSec(root)
-mode.grid(row=0, column=0, sticky='we')
-
-root.columnconfigure(0, weight=1)
-
-mode.set_default()
-
-root.mainloop()

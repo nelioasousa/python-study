@@ -28,6 +28,7 @@ VEV_CARD_CREATE = '<<CardCreate>>'
 VEV_CARD_DELETE = '<<CardDelete>>'
 VEV_CARD_NONE = '<<NoWorkingCard>>'
 VEV_CARD_FILTER = '<<CardFiltering>>'
+VEV_FILTER_CATEG = '<<FilterCategSet>>'
 
 class CardsSec:
 
@@ -53,6 +54,8 @@ class CardsSec:
             self._inner_frame, text='Filter ctg.', padding=1)
         self.filter_categ_lbl.grid(row=1, column=0, sticky='we')
         self.filter_categ_var = tk.StringVar()
+        self.filter_categ_var.trace_add('write',
+                                        self.filter_categ_selection_callback)
         self.filter_categ_combox = ttk.Combobox(
             self._inner_frame, state='readonly',
             textvariable=self.filter_categ_var)
@@ -160,7 +163,7 @@ class CardsSec:
             return False
         old_idx = self.cards_tree_list.index(cid)
         return self.switch_card_by_index(old_idx, new_idx)
-    
+
     def switch_card_by_index(self, old_idx, new_idx):
         if old_idx == new_idx:
             return True
@@ -211,6 +214,10 @@ class CardsSec:
             self._selected.set('')
             self.root.event_generate(VEV_CARD_NONE)
 
+    def filter_categ_selection_callback(self, *args):
+        self.root.event_generate(
+            VEV_FILTER_CATEG, data=self.filter_categ_var.get())
+
     def filter_callback(self, *args):
         self.root.event_generate(VEV_CARD_FILTER,
                                  data=(self.filter_categ_var.get(),
@@ -237,28 +244,3 @@ class CardsSec:
         self.frame.grid(row=row, column=column, sticky=sticky,
                         rowspan=rowspan, columnspan=columnspan,
                         **kwargs)
-
-root = tk.Tk()
-projects = CardsSec(root)
-projects.grid(row=0, column=0)
-
-projects.set_filter_categories(('Name', 'Score'))
-projects.set_filter_values(('Card1', 'Card2', 'Card3', 'Card4', 'Card5'))
-
-projects.extend_cards(('c1', 'c2', 'c3', 'c4', 'c5'),
-                      ('Card1', 'Card2', 'Card3', 'Card4', 'Card5'),
-                      (45, 32, 12, 10, 2))
-
-projects.detach_card_by_id('c4')
-
-projects.switch_card_by_id('c1', 2)
-
-projects.pop_card()
-
-projects.reattach_card('c4')
-
-projects.insert_card('c6', 'Card6', 69)
-
-projects.delete_btn.configure(command=(lambda : projects.remove_all_cards()))
-
-root.mainloop()

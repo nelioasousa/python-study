@@ -37,13 +37,14 @@ class Card:
     def __init__(self, parent):
         self.parent = parent
         # Canvas
-        self._color = '#D4F7F7'
+        self._color = '#99E2E2'
         self.canvas = tk.Canvas(
             self.parent, width=400, height=400,
             bg=self._color, highlightthickness=0)
         # Title label
         self.title_var = tk.StringVar()
-        self.title_lbl = ttk.Label(self.canvas, textvariable=self.title_var)
+        self.title_lbl = ttk.Label(
+            self.canvas, textvariable=self.title_var, background=self._color)
         # Edit button
         self.edit_btn = ttk.Button(
             self.canvas, text='Edit', state='disabled',
@@ -54,8 +55,7 @@ class Card:
             command=self.flip_callback)
         # Card content
         self.txt_lbl = ttk.Label(
-            self.canvas, text='', padding=1,
-            justify='center', background=self._color)
+            self.canvas, text='', justify='center', background=self._color)
         self._txt_id = None
         self._img_id = None  # 200x200
         # Canvas do not keep a referente to the image object
@@ -93,12 +93,14 @@ class Card:
     def _set_text(self, text, position=None):
         self.txt_lbl.configure(text=text)
         if position is not None:
+            # moveto method uses top-left corner for positioning
+            # widget WxH needed so widget center falls in position
             w = self.txt_lbl.winfo_reqwidth()
             h = self.txt_lbl.winfo_reqheight()
             self.canvas.moveto(
                 self._txt_id, position[0] - w/2, position[1] - h/2)
         self.canvas.itemconfigure(self._txt_id, state='normal')
-    
+
     def _set_image(self, img_path, position):
         self.remove_image()
         self._img = load_tk_photoimage(img_path)
@@ -151,6 +153,7 @@ class Card:
 
 VEV_KNOW_CARD = '<<KnowCard>>'
 VEV_DKNOW_CARD = '<<DontKnowCard>>'
+
 class CardSec:
 
     def __init__(self, root):
@@ -170,15 +173,15 @@ class CardSec:
             self.frame, text='Don\'t know',
             command=self.dknow_callback, state='disabled')
         self.dknow_btn.grid(row=2, column=2)
-        self.frame.rowconfigure(1, pad=2)
+        self.frame.rowconfigure(1, pad=10)
         # Resizing/Borders
         self.frame.rowconfigure((0, 3), weight=1, uniform=True)
         self.frame.columnconfigure((0, 3), weight=1, uniform=True)
         self.frame.configure(borderwidth=5, relief='groove')
-    
+
     def know_callback(self):
         self.root.event_generate(VEV_KNOW_CARD)
-    
+
     def dknow_callback(self):
         self.root.event_generate(VEV_DKNOW_CARD)
 
@@ -195,16 +198,3 @@ class CardSec:
         self.frame.grid(row=row, column=column, sticky=sticky,
                         rowspan=rowspan, columnspan=columnspan,
                         **kwargs)
-
-# root = tk.Tk()
-# card_sec = CardSec(root)
-# card_sec.grid(row=0, column=0)
-
-# card_sec.card.set_content('Hi!\n'
-#                           'I\'m a multiline text that goes into the card!\n'
-#                           'Nice to meet ya!')
-
-# card_sec.card.enable_buttons('all')
-# card_sec.enable_buttons()
-
-# root.mainloop()

@@ -30,7 +30,6 @@ VEV_PROJ_ENTRY_CREATE = '<<ProjectEntryCreate>>'
 VEV_PROJ_POPUP_CREATE = '<<ProjectPopupCreate>>'
 VEV_PROJ_DELETE = '<<ProjectDelete>>'
 
-
 class ProjectsSec:
 
     def __init__(self, root):
@@ -126,18 +125,3 @@ class ProjectsSec:
         else:
             self.delete_btn.state(['!disabled'])
             self.create_btn.state(['disabled'])
-
-
-root = tk.Tk()
-projects = ProjectsSec(root)
-projects.grid(row=0, column=0)
-
-def get_values():
-    return ['Opt1', 'Opt2']
-
-projects.set_post_command(get_values)
-
-projects.set_working_project('Opt1')  # Works
-projects.set_working_project('Test')  # Do nothing
-
-root.mainloop()
