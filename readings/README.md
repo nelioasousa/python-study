@@ -53,4 +53,5 @@ Python simple and compound statements in depth. Focus is on `assert`, `yield`, `
 | [PEP 0485 - A Function for testing approximate equality](https://peps.python.org/pep-0485/) | 1 |
 | [Python Reference - The import system](https://docs.python.org/3/reference/import.html) |  |
 | [Python Tutorial - Modules](https://docs.python.org/3/tutorial/modules.html) |  |
+| [PEP 0420 - Implicit Namespace Packages](https://peps.python.org/pep-0420/) |  |
 | [PEP 0302 - New Import Hooks](https://peps.python.org/pep-0302/) |  |
