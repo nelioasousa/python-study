@@ -27,8 +27,8 @@ VEV_CARD_SET = '<<CardSet>>'
 VEV_CARD_CREATE = '<<CardCreate>>'
 VEV_CARD_DELETE = '<<CardDelete>>'
 VEV_CARD_NONE = '<<NoWorkingCard>>'
-VEV_CARD_FILTER = '<<CardFiltering>>'
-VEV_FILTER_CATEG = '<<FilterCategSet>>'
+VEV_CARDS_FILTERING = '<<CardsFiltering>>'
+VEV_FILTER_CATEG_SET = '<<FilterCategSet>>'
 
 class CardsSec:
 
@@ -54,8 +54,8 @@ class CardsSec:
             self._inner_frame, text='Filter ctg.', padding=1)
         self.filter_categ_lbl.grid(row=1, column=0, sticky='we')
         self.filter_categ_var = tk.StringVar()
-        self.filter_categ_var.trace_add('write',
-                                        self.filter_categ_selection_callback)
+        self.filter_categ_var.trace_add(
+            'write', self.filter_categ_selection_callback)
         self.filter_categ_combox = ttk.Combobox(
             self._inner_frame, state='readonly',
             textvariable=self.filter_categ_var)
@@ -72,9 +72,8 @@ class CardsSec:
         self.filter_value_combox.bind('<Return>', self.filter_callback)
         self.filter_value_combox.grid(
             row=2, column=1, columnspan=3, sticky='we', pady=(1, 0))
-        # Selected item
-        self._selected = tk.StringVar()
-        self._selected.trace_add('write', self.button_state_callback)
+        # Selected card
+        self._selected = None
         ## Tag for implementing selection event
         self._dclick = 'dclick'
         self.cards_tree_list.tag_bind(
@@ -93,7 +92,7 @@ class CardsSec:
             command=self.delete_callback, state='disabled')
         self.delete_btn.grid(
             row=2, column=1, padx=(1, 0), pady=(2, 0), sticky='we')
-        # Needed since treeview 'losses' detached items
+        # Needed because treeview 'loses' detached items
         self.detached_cards = []
         # Resizing/Borders
         self._inner_frame.columnconfigure(
@@ -102,20 +101,32 @@ class CardsSec:
         self.frame.rowconfigure(1, weight=1)
         self.frame.configure(borderwidth=5, relief='groove')
 
-    def insert_card(self, cid, text, score, idx='end'):
-        self.cards_tree_list.insert(
-            '', idx, cid, text=text, values=score, tags=self._dclick)
-
-    def extend_cards(self, cids, texts, scores, at=None):
-        if at is None:
-            for cid, text, score in zip(cids, texts, scores):
-                self.cards_tree_list.insert(
-                    '', 'end', cid, text=text,
-                    values=score, tags=self._dclick)
+    def set_working_card(self, cid=None):
+        if self._selected is not None:
+            self.cards_tree_list.item(self._selected, tags=(self._dclick,))
+        if cid is None:
+            self._selected = None
+            self.delete_btn.state(['disabled'])
         else:
-            for cid, text, score in zip(cids, texts, scores):
+            self._selected = cid
+            self.cards_tree_list.item(cid, tags=(self._dclick, self._slct))
+            self.delete_btn.state(['!disabled'])
+
+    def insert_card(self, cid, name, score, idx='end'):
+        self.cards_tree_list.insert(
+            '', idx, cid, text=name, values=score, tags=(self._dclick,))
+
+    def extend_cards(self, cids, names, scores, at=None):
+        if at is None:
+            for cid, name, score in zip(cids, names, scores):
                 self.cards_tree_list.insert(
-                    '', at, cid, text=text, values=score, tags=self._dclick)
+                    '', 'end', cid, text=name,
+                    values=score, tags=(self._dclick,))
+        else:
+            for cid, name, score in zip(cids, names, scores):
+                self.cards_tree_list.insert(
+                    '', at, cid, text=name,
+                    values=score, tags=(self._dclick,))
                 at += 1
 
     def remove_card(self, cid):
@@ -191,43 +202,31 @@ class CardsSec:
         self.cards_tree_list.delete(*self.detached_cards)
         self.cards_tree_list.delete(*self.cards_tree_list.get_children())
         self.detached_cards = []
+        self.root.event_generate(VEV_CARD_NONE)
 
     def create_callback(self):
         self.root.event_generate(VEV_CARD_CREATE)
 
     def delete_callback(self):
-        selected_item = self._selected.get()
-        if selected_item:
-            self.root.event_generate(VEV_CARD_DELETE, data=selected_item)
+        self.root.event_generate(VEV_CARD_DELETE, data=self._selected)
 
     def selection_callback(self, *args):
-        selected_item = self._selected.get()
-        if selected_item:
-            self.cards_tree_list.item(selected_item, tags=(self._dclick,))
         selection = self.cards_tree_list.selection()
         if selection:
-            self._selected.set(selection[0])
-            self.cards_tree_list.item(
-                selection[0], tags=(self._dclick, self._slct))
+            self.set_working_card(selection[0])
             self.root.event_generate(VEV_CARD_SET, data=selection[0])
         else:
-            self._selected.set('')
+            self.set_working_card()
             self.root.event_generate(VEV_CARD_NONE)
 
     def filter_categ_selection_callback(self, *args):
         self.root.event_generate(
-            VEV_FILTER_CATEG, data=self.filter_categ_var.get())
+            VEV_FILTER_CATEG_SET, data=self.filter_categ_var.get())
 
     def filter_callback(self, *args):
-        self.root.event_generate(VEV_CARD_FILTER,
-                                 data=(self.filter_categ_var.get(),
-                                       self.filter_value_var.get()))
-
-    def button_state_callback(self, *args):
-        if self._selected:
-            self.delete_btn.state(['!disabled'])
-        else:
-            self.delete_btn.state(['disabled'])
+        self.root.event_generate(
+            VEV_CARDS_FILTERING,
+            data=(self.filter_categ_var.get(), self.filter_value_var.get()))
 
     def set_filter_categories(self, categories):
         self.filter_categ_var.set('')
