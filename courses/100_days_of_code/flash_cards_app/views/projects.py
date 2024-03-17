@@ -28,6 +28,7 @@ import tkinter.ttk as ttk
 VEV_PROJ_SET = '<<ProjectSet>>'
 VEV_PROJ_CREATE = '<<ProjectCreate>>'
 VEV_PROJ_DELETE = '<<ProjectDelete>>'
+VEV_PROJ_NONE = '<<NoWorkingProject>>'
 
 class ProjectsSec:
 
@@ -36,23 +37,23 @@ class ProjectsSec:
         # Section frame
         self.frame = ttk.Frame(root)
         # Project selection combobox
-        self._combox_entry = tk.StringVar()
-        self._combox_entry.trace_add('write', self.att_buttons_state)
+        self.projects_var = tk.StringVar()
+        self.projects_var.trace_add('write', self.att_buttons_state)
         self.projects_combox = ttk.Combobox(
             self.frame, height=5, state='normal',
-            textvariable=self._combox_entry)
+            textvariable=self.projects_var)
         self.projects_combox.grid(row=0, column=1, columnspan=3, sticky='we')
-        self.projects_combox.bind('<Return>', self.combobox_return)
+        self.projects_combox.bind('<Return>', self.combobox_return_handler)
         self.projects_combox.bind('<<ComboboxSelected>>',
-                                  self.combobox_selection)
+                                  self.combobox_selection_handler)
         # Attribute to store project creation popup
         self.popup = None
         # Dummy/Default function to list projects
         self.set_post_command()
         # Combobox label
-        self.project_lbl = ttk.Label(
+        self.sec_header_lbl = ttk.Label(
             self.frame, text='Project:', anchor='center', padding=1)
-        self.project_lbl.grid(row=0, column=0)
+        self.sec_header_lbl.grid(row=0, column=0)
         # New project button
         self.create_btn = ttk.Button(
             self.frame, text='New', command=self.create_callback)
@@ -62,7 +63,7 @@ class ProjectsSec:
         # Delete project button
         self.delete_btn = ttk.Button(
             self.frame, text='Delete',
-            command=self.delete_project, state='disabled')
+            command=self.delete_callback, state='disabled')
         self.delete_btn.grid(
             row=1, column=2, columnspan=2,
             sticky='we', padx=(1, 0), pady=(2, 0))
@@ -86,30 +87,48 @@ class ProjectsSec:
         self.projects_combox.configure(
             validate=val_trigger, validatecommand=val_command)
 
-    def set_working_project(self, project_name):
-        if project_name in self.get_listed_projects():
-            self.projects_combox.set(project_name)
-            self.combobox_selection()
-
     def get_listed_projects(self):
         return self._post_command()
 
-    def get_selection(self):
-        proj_selection = self.projects_combox.get()
+    def set_working_project(self, project_name):
+        if project_name in self.get_listed_projects():
+            self.projects_var.set(project_name)
+        else:
+            self.projects_var.set('')
+        self.combobox_selection_handler()
+
+    def get_working_project(self):
+        proj_selection = self.projects_var.get()
         if proj_selection in self.get_listed_projects():
             return proj_selection
         return None
 
-    def combobox_return(self, *args):
-        entry = self.projects_combox.get()
-        if entry in self.get_listed_projects():
-            self.root.event_generate(VEV_PROJ_SET, data=entry)
-        else:
-            self.root.event_generate(VEV_PROJ_CREATE, data=entry)
+    def combobox_return_handler(self, *args):
+        selection = self.projects_var.get()
+        if selection in self.get_listed_projects():
+            self.root.event_generate(VEV_PROJ_SET, data=selection)
+            return
+        if selection:
+            self.root.event_generate(VEV_PROJ_CREATE, data=selection)
 
-    def combobox_selection(self, *args):
+    def combobox_selection_handler(self, *args):
         self.projects_combox.selection_clear()  # Clear text selection
-        self.root.event_generate(VEV_PROJ_SET, data=self.get_selection())
+        selection = self.get_working_project()
+        if selection is None:
+            self.root.event_generate(VEV_PROJ_NONE)
+        else:
+            self.root.event_generate(VEV_PROJ_SET, data=selection)
+
+    def popup_create_handler(self, *args):
+        name = self.popup.get_project_name()
+        self.popup.close()
+        self.popup = None
+        self.projects_var.set(name)
+        self.combobox_return_handler()
+
+    def popup_cancel_handler(self, *args):
+        self.popup.close()
+        self.popup = None
 
     def create_callback(self):
         if self.popup is None:
@@ -120,19 +139,8 @@ class ProjectsSec:
             except AttributeError:
                 pass
 
-    def popup_create_handler(self, *args):
-        name = self.popup.get_name()
-        self.popup.close()
-        self.popup = None
-        self.projects_combox.set(name)
-        self.combobox_return()
-
-    def popup_cancel_handler(self, *args):
-        self.popup.close()
-        self.popup = None
-
-    def delete_project(self):
-        selection = self.get_selection()
+    def delete_callback(self):
+        selection = self.get_working_project()
         if selection is not None:
             self.root.event_generate(VEV_PROJ_DELETE, data=selection)
 
@@ -143,7 +151,7 @@ class ProjectsSec:
                         **kwargs)
 
     def att_buttons_state(self, *args):
-        if self.get_selection() is None:
+        if self.get_working_project() is None:
             self.delete_btn.state(['disabled'])
             self.create_btn.state(['!disabled'])
         else:
@@ -156,11 +164,10 @@ VEV_PROJECT_POPUP_CANCEL = '<<ProjectPopupCancel>>'
 
 class ProjectCreationPopup:
 
-    def __init__(self, parent):
-        self.parent = parent
-        self.root = parent.winfo_toplevel()
+    def __init__(self, root):
+        self.root = root
         # Popup window
-        self.popup = tk.Toplevel(parent)
+        self.popup = tk.Toplevel(root)
         self.popup.title('Project creation')
         self.popup.rowconfigure(0, weight=1)
         self.popup.columnconfigure(0, weight=1)
@@ -170,11 +177,11 @@ class ProjectCreationPopup:
         self.frame.columnconfigure((0, 1), weight=1, uniform=True)
         self.frame.configure(borderwidth=5, relief='groove')
         # Label
-        self.lbl = ttk.Label(
+        self.name_lbl = ttk.Label(
             self.frame, text='Project name:', padding=1, anchor='center')
-        self.lbl.grid(
+        self.name_lbl.grid(
             row=0, column=0, columnspan=2, sticky='wnes', pady=(0, 5))
-        # Entry
+        # Project name entry
         self.name_var = tk.StringVar()
         self.name_entry = ttk.Entry(
             self.frame, width=45, textvariable=self.name_var)
@@ -205,5 +212,5 @@ class ProjectCreationPopup:
         self.name_entry.configure(
             validate=val_trigger, validatecommand=val_command)
 
-    def get_name(self):
+    def get_project_name(self):
         return self.name_var.get()

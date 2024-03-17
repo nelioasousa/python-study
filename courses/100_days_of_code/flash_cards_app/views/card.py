@@ -44,9 +44,9 @@ class Card:
             self.parent, width=500, height=500,
             bg=self._bg_color, highlightthickness=0)
         # Title label
-        self._side_var = tk.StringVar()
-        self._side_lbl = ttk.Label(
-            self.canvas, textvariable=self._side_var,
+        self.side_var = tk.StringVar()
+        self.side_lbl = ttk.Label(
+            self.canvas, textvariable=self.side_var,
             background=self._bg_color)
         # Edit button
         self.edit_btn = ttk.Button(
@@ -69,20 +69,18 @@ class Card:
         self._back_img = None
         ## Text
         self._front_txt_id = None
-        self._front_txt_lbl = None
         self._back_txt_id = None
-        self._back_txt_lbl = None
         # Positioning
         ## Functionality widgets
         self.canvas.create_window(
-            250, 17, anchor='center', window=self._side_lbl)
+            250, 17, anchor='center', window=self.side_lbl)
         self.canvas.create_window(5, 5, anchor='nw', window=self.edit_btn)
         self.canvas.create_window(495, 5, anchor='ne', window=self.flip_btn)
         ## Content widgets
         ### Positions
-        self._center = (250, 265)
-        self._top = (250, 185)
-        self._bottom = (250, 415)
+        self._center = (250, 270)
+        self._top = (250, 200)
+        self._bottom = (250, 425)
         # Default look
         self.set_as_empty()
 
@@ -120,21 +118,19 @@ class Card:
     def _set_text(self, text, position, which, state='normal'):
         if which in ('f', 'front'):
             self.remove_texts('front')
-            self._front_txt_lbl = ttk.Label(
+            front_txt_lbl = ttk.Label(
                 self.canvas, text=text,
                 background=self._bg_color, justify='center')
             self._front_txt_id = self.canvas.create_window(
-                *position, anchor='center',
-                window=self._front_txt_lbl, state=state)
+                *position, anchor='center', window=front_txt_lbl, state=state)
             return self._front_txt_id
         if which in ('b', 'back'):
             self.remove_texts('back')
-            self._back_txt_lbl = ttk.Label(
+            back_txt_lbl = ttk.Label(
                 self.canvas, text=text,
                 background=self._bg_color, justify='center')
             self._back_txt_id = self.canvas.create_window(
-                *position, anchor='center',
-                window=self._back_txt_lbl, state=state)
+                *position, anchor='center', window=back_txt_lbl, state=state)
             return self._back_txt_id
         return None
 
@@ -159,7 +155,7 @@ class Card:
         self.remove_images()
         self.remove_texts()
         self._card = card
-        self._side_var.set('Front')
+        self.side_var.set('Front')
         if card.fimg and card.ftxt:
             self._set_image(
                 card.fimg, position=self._top, which='front')
@@ -208,18 +204,18 @@ class Card:
         self.root.event_generate(VEV_EDIT_CARD)
 
     def flip_callback(self):
-        if self._side_var.get() == 'Front':
+        if self.side_var.get() == 'Front':
             self._hide_item(self._front_img_id)
             self._hide_item(self._front_txt_id)
             self._show_item(self._back_img_id)
             self._show_item(self._back_txt_id)
-            self._side_var.set('Back')
+            self.side_var.set('Back')
         else:
             self._hide_item(self._back_img_id)
             self._hide_item(self._back_txt_id)
             self._show_item(self._front_img_id)
             self._show_item(self._front_txt_id)
-            self._side_var.set('Front')
+            self.side_var.set('Front')
 
     def grid(self, *, row, column,
              rowspan=1, columnspan=1, sticky='', **kwargs):
@@ -247,7 +243,7 @@ class CardSec:
         self.know_btn.grid(row=2, column=1)
         # Don't know button
         self.dknow_btn = ttk.Button(
-            self.frame, text='Don\'t know',
+            self.frame, text="Don't know",
             command=self.dknow_callback, state='disabled')
         self.dknow_btn.grid(row=2, column=2)
         self.frame.rowconfigure(1, pad=10)
@@ -257,10 +253,18 @@ class CardSec:
         self.frame.configure(borderwidth=5, relief='groove')
 
     def know_callback(self):
-        self.root.event_generate(VEV_KNOW_CARD)
+        try:
+            self.root.event_generate(
+                VEV_KNOW_CARD, data=self.card._card.name)
+        except AttributeError:
+            pass
 
     def dknow_callback(self):
-        self.root.event_generate(VEV_DKNOW_CARD)
+        try:
+            self.root.event_generate(
+                VEV_DKNOW_CARD, data=self.card._card.name)
+        except AttributeError:
+            pass
 
     def disable_buttons(self):
         self.know_btn['state'] = 'disabled'
@@ -402,6 +406,7 @@ class CardPopup:
         return popup
 
     def ask_img_file(self) -> str:
+        # Pillow read and write supported files
         fmts = (('Image', ('.png', '.jpg', '.gif', '.jpeg', '.tiff')),)
         return askopenfilename(parent=self.popup,
                                title='Select a image file',
@@ -434,7 +439,7 @@ class CardPopup:
         ## First char must be a float
         ## 0.0 and 1.0 seem to have the same effect
         ## Probably 1-based indexing
-        ## But why float? because of unicode?
+        ## But why float? Because of unicode? Idk yet
         self.front_txt_box.delete('0.0', 'end')
         self.front_txt_box.insert('0.0', '%s\n' %front_txt.strip())
         # Back image
@@ -445,7 +450,7 @@ class CardPopup:
 
     def get_content(self):
         return (self.card_name_var.get(),
-                self.learned_var.get(),
+                bool(self.learned_var.get()),
                 self.front_img_var.get(),
                 self.front_txt_box.get('0.0', 'end').strip(),
                 self.back_img_var.get(),

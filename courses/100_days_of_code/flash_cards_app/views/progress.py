@@ -42,7 +42,7 @@ class ProgressSec:
         self.learned_today_lbl.grid(row=2, column=0, sticky='w')
         # Progress bar
         self.progress_var = tk.StringVar(value='0.0')
-        self.progress_var.trace_add('write', self._update_progress_caption)
+        self.progress_var.trace_add('write', self._update_progress)
         self.progress_lbl = ttk.Label(
             self.frame, text='Overall progress : 0.0%', anchor='w')
         self.progress_lbl.grid(row=3, column=0, sticky='w')
@@ -54,7 +54,7 @@ class ProgressSec:
         self.frame.columnconfigure(0, weight=1)
         self.frame.configure(borderwidth=5, relief='groove')
 
-    def _update_progress_caption(self, *args):
+    def _update_progress(self, *args):
         self.progress_lbl.configure(
             text='Overall progress : %s%%' %self.progress_var.get())
 

@@ -41,21 +41,22 @@ class CardsSec:
         self.header_lbl.grid(row=0, column=0, columnspan=2, sticky='wnes')
         # Cards tree list
         self._inner_frame = ttk.Frame(self.frame, relief='sunken', padding=5)
-        self._inner_frame.grid(row=1, column=0, columnspan=2, sticky='ns')
+        self._inner_frame.grid(row=1, column=0, columnspan=2, sticky='wnes')
         self.cards_tree_list = ttk.Treeview(
             self._inner_frame, height=15,
             selectmode='browse', columns=('score',))
         self.cards_tree_list.column('score', width=60)
         self.cards_tree_list.heading('#0', text='Name')
         self.cards_tree_list.heading('score', text='Score')
-        self.cards_tree_list.grid(row=0, column=0, columnspan=4, sticky='ns')
+        self.cards_tree_list.grid(
+            row=0, column=0, columnspan=4, sticky='wnes')
         ## Filter category
         self.filter_categ_lbl = ttk.Label(
             self._inner_frame, text='Filter ctg.', padding=1)
         self.filter_categ_lbl.grid(row=1, column=0, sticky='we')
         self.filter_categ_var = tk.StringVar()
         self.filter_categ_var.trace_add(
-            'write', self.filter_categ_selection_callback)
+            'write', self.filter_categ_selection_handler)
         self.filter_categ_combox = ttk.Combobox(
             self._inner_frame, state='readonly',
             textvariable=self.filter_categ_var)
@@ -69,7 +70,7 @@ class CardsSec:
         self.filter_value_combox = ttk.Combobox(
             self._inner_frame, state='normal',
             textvariable=self.filter_value_var)
-        self.filter_value_combox.bind('<Return>', self.filter_callback)
+        self.filter_value_combox.bind('<Return>', self.filter_handler)
         self.filter_value_combox.grid(
             row=2, column=1, columnspan=3, sticky='we', pady=(1, 0))
         # Selected card
@@ -77,8 +78,8 @@ class CardsSec:
         ## Tag for implementing selection event
         self._dclick = 'dclick'
         self.cards_tree_list.tag_bind(
-            self._dclick, '<Double-Button-1>', self.selection_callback)
-        ## Selected item tag
+            self._dclick, '<Double-Button-1>', self.selection_handler)
+        ## Tag for configure selected item
         self._slct = 'selected'
         self.cards_tree_list.tag_configure(self._slct, background='#E0E0E0')
         # Button to create new card
@@ -151,7 +152,7 @@ class CardsSec:
         self.detached_cards.append(cid)
         return idx
 
-    def detach_card_by_index(self, idx=-1):
+    def detach_card_by_index(self, idx):
         try:
             cid = self.cards_tree_list.get_children()[idx]
         except IndexError:
@@ -208,9 +209,10 @@ class CardsSec:
         self.root.event_generate(VEV_CARD_CREATE)
 
     def delete_callback(self):
-        self.root.event_generate(VEV_CARD_DELETE, data=self._selected)
+        if self._selected is not None:
+            self.root.event_generate(VEV_CARD_DELETE, data=self._selected)
 
-    def selection_callback(self, *args):
+    def selection_handler(self, *args):
         selection = self.cards_tree_list.selection()
         if selection:
             self.set_working_card(selection[0])
@@ -219,14 +221,15 @@ class CardsSec:
             self.set_working_card()
             self.root.event_generate(VEV_CARD_NONE)
 
-    def filter_categ_selection_callback(self, *args):
+    def filter_categ_selection_handler(self, *args):
         self.root.event_generate(
             VEV_FILTER_CATEG_SET, data=self.filter_categ_var.get())
 
-    def filter_callback(self, *args):
+    def filter_handler(self, *args):
         self.root.event_generate(
             VEV_CARDS_FILTERING,
-            data=(self.filter_categ_var.get(), self.filter_value_var.get()))
+            data='fctg:%s,fval:%s' %(self.filter_categ_var.get(),
+                                     self.filter_value_var.get()))
 
     def set_filter_categories(self, categories):
         self.filter_categ_var.set('')
