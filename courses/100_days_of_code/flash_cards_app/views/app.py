@@ -1,64 +1,61 @@
-from tkinter import Tk
+from tkinter import Tk as _Tk
 
-from projects import ProjectsSec
-from cards import CardsSec, VEV_CARD_CREATE
-from progress import ProgressSec
-from mode import ModeSec
-from card import CardSec, VEV_EDIT_CARD, VEV_CARD_POPUP_CONCLUDE, VEV_CARD_POPUP_CANCEL
-from card import CardPopup
+from projects import *
+from cards import *
+from mode import *
+from card import *
+from progress import *
 
-import sys
-sys.path.append('..')
-from model import Card
 
-root = Tk()
+VEV_CLOSE_APP = '<<CloseApp>>'
 
-projects_sec = ProjectsSec(root)
-cards_sec = CardsSec(root)
-progress_sec = ProgressSec(root)
-mode_sec = ModeSec(root)
-card_sec = CardSec(root)
 
-projects_sec.grid(row=0, column=1, sticky='wnes', padx=(1, 2), pady=(2, 0))
-cards_sec.grid(row=1, column=1, sticky='wnes', padx=(1, 2), pady=(0, 0))
-progress_sec.grid(row=2, column=1, sticky='wnes', padx=(1, 2), pady=(0, 0))
-mode_sec.grid(row=3, column=1, sticky='wnes', padx=(1, 2), pady=(0, 2))
-card_sec.grid(row=0, column=0, rowspan=4, sticky='wnes', pady=2, padx=(2, 0))
+class App:
 
-root.rowconfigure(1, weight=1)
-root.columnconfigure(0, weight=1)
+    def __init__(self):
+        self.root = _Tk()
+        # App sections
+        self.projects_section = ProjectsSec(self.root)
+        self.cards_section = CardsSec(self.root)
+        self.progress_section = ProgressSec(self.root)
+        self.card_section = CardSec(self.root)
+        self.mode_section = ModeSec(self.root)
+        # Positioning
+        self.projects_section._grid(
+            row=0, column=1, sticky='wnes', padx=(1, 2), pady=(2, 0))
+        self.cards_section._grid(
+            row=1, column=1, sticky='wnes', padx=(1, 2), pady=(0, 0))
+        self.progress_section._grid(
+            row=2, column=1, sticky='wnes', padx=(1, 2), pady=(0, 0))
+        self.mode_section._grid(
+            row=3, column=1, sticky='wnes', padx=(1, 2), pady=(0, 2))
+        self.card_section._grid(
+            row=0, column=0, rowspan=4, sticky='wnes', pady=2, padx=(2, 0))
+        # Resizing
+        self.root.rowconfigure(1, weight=1)
+        self.root.columnconfigure(0, weight=1)
+        # Working data
+        self.projects = []
+        self.working_project = None
+        self.working_card = None
+        # Handle app destroy
+        self.root.protocol('WM_DELETE_WINDOW', self.close_callback)
 
-card = Card('Card1',
-            'example.png',
-            'Ging Freecss',
-            'example.png',
-            'You should enjoy the little detours to the fullest!')
+    def close_callback(self):
+        self.root.event_generate(VEV_CLOSE_APP)
 
-card_sec.card.set_card(card)
-card_sec.card.enable_buttons()
+    def run(self):
+        self.root.mainloop()
 
-popup = None
-
-def edit_popup(*args):
-    global popup
-    if popup is None:
-        popup = CardPopup.card_edition_popup(root, card)
-        popup.warning('Hello, my friend!')
-
-def create_popup(*args):
-    global popup
-    if popup is None:
-        popup = CardPopup.card_creation_popup(root)
-
-def kill_popup(*args):
-    global popup
-    if popup is not None:
-        popup.close()
-        popup = None
-
-root.bind(VEV_EDIT_CARD, edit_popup)
-root.bind(VEV_CARD_CREATE, create_popup)
-root.bind(VEV_CARD_POPUP_CONCLUDE, kill_popup)
-root.bind(VEV_CARD_POPUP_CANCEL, kill_popup)
-
-root.mainloop()
+app = App()
+app.card_section.card.set_content(
+    '?', 'example.png', 'Ging Freecss', 'example.png',
+    'You should enjoy the little detours to the fullest!')
+app.card_section.card.enable_buttons('flip')
+app.projects_section.set_post_command(lambda : ('Project 1', 'Project 2'))
+app.cards_section.extend_cards(
+    ('c1', 'c2', 'c3'),
+    ('Card 1', 'Card 2', 'Card 3'),
+    (99, 66, 33))
+app.root.bind(VEV_CLOSE_APP, lambda _event: app.root.destroy())
+app.run()
