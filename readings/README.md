@@ -45,9 +45,9 @@ Python simple and compound statements in depth. Focus is on `assert`, `yield`, `
 ## Modules, packages, importing
 | Description | Recommendation (1-5) |
 | :---        | :---                 |
-| [Python Reference - The import system](https://docs.python.org/3/reference/import.html) |  |
+| [Python Reference - The import system](https://docs.python.org/3/reference/import.html) | 4 |
 | [Python Tutorial - Modules](https://docs.python.org/3/tutorial/modules.html) | 5 |
-| [The initialization of the sys.path module search path](https://docs.python.org/3/library/sys_path_init.html) |  |
+| [The initialization of the sys.path module search path](https://docs.python.org/3/library/sys_path_init.html) | 5 |
 | [PEP 0420 - Implicit Namespace Packages](https://peps.python.org/pep-0420/) |  |
 | [PEP 0302 - New Import Hooks](https://peps.python.org/pep-0302/) |  |
 
