@@ -81,6 +81,12 @@ class ProgressSec:
         num_lr = int(self._learned_today_var.get())
         self.set_todays_learnings(num_lr + increment)
 
+    def reset(self):
+        self.set_progress(0.0)
+        self.set_last_studied('')
+        self.set_todays_reviews('')
+        self.set_todays_learnings('')
+
     def _grid(self, *, row, column,
               rowspan=1, columnspan=1, sticky='', **kwargs):
         self._frame.grid(row=row, column=column, sticky=sticky,

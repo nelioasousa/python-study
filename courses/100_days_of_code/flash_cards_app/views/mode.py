@@ -37,6 +37,9 @@ class ModeSec:
         else:
             self.set_default()
 
+    def get_mode(self):
+        return 'quiz' if self._mode_var.get() == '1' else 'revision'
+
     def set_default(self):
         self._mode_var.set('0')
         self._root.event_generate(VEV_REVISION_MODE)

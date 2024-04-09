@@ -75,7 +75,7 @@ class ProjectsSec:
     def get_listed_projects(self):
         return self._post_command()
 
-    def set_working_project(self, project_name):
+    def set_working_project(self, project_name=None):
         if project_name in self.get_listed_projects():
             self._projects_var.set(project_name)
         else:

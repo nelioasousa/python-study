@@ -93,8 +93,10 @@ class CardsSec:
         self._frame.configure(borderwidth=5, relief='groove')
 
     def set_working_card(self, cid=None):
-        if self._selected is not None:
+        try:
             self._cards_tree_list.item(self._selected, tags=(self._dclick,))
+        except tk.TclError:
+            pass
         if cid is None:
             self._selected = None
             self._delete_btn.state(['disabled'])
@@ -195,7 +197,7 @@ class CardsSec:
         self._cards_tree_list.delete(*self._detached_cards)
         self._cards_tree_list.delete(*self._cards_tree_list.get_children())
         self._detached_cards = []
-        self._root.event_generate(VEV_CARD_NONE)
+        self.set_working_card()
 
     def _create_callback(self):
         self._root.event_generate(VEV_CARD_CREATE)
@@ -209,14 +211,10 @@ class CardsSec:
         self.set_working_card(selection[0] if selection else None)
 
     def _filter_categ_selection_handler(self, *args):
-        self._root.event_generate(
-            VEV_FILTER_CATEG_SET, data=self._filter_categ_var.get())
+        self._root.event_generate(VEV_FILTER_CATEG_SET)
 
     def _filter_handler(self, *args):
-        self._root.event_generate(
-            VEV_CARDS_FILTERING,
-            data='fctg:%s,fval:%s' %(self._filter_categ_var.get(),
-                                     self._filter_value_var.get()))
+        self._root.event_generate(VEV_CARDS_FILTERING)
 
     def set_filter_categories(self, categories):
         self._filter_categ_var.set('')

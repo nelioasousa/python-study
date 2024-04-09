@@ -7,6 +7,7 @@ from os.path import normpath
 
 
 all = ["VEV_EDIT_CARD",
+       "VEV_CARD_FLIPPED",
        "VEV_KNOW_CARD",
        "VEV_DKNOW_CARD",
        "VEV_CARD_POPUP_CANCEL",
@@ -20,6 +21,7 @@ def load_tk_photoimage(img_path):
 
 
 VEV_EDIT_CARD = '<<EditCard>>'
+VEV_CARD_FLIPPED = '<<CardFlipped>>'
 
 
 class Card:
@@ -200,6 +202,7 @@ class Card:
             self._show_item(self._front_img_id)
             self._show_item(self._front_txt_id)
             self._side_var.set('Front')
+        self._root.event_generate(VEV_CARD_FLIPPED)
 
     def _grid(self, *, row, column,
               rowspan=1, columnspan=1, sticky='', **kwargs):
@@ -239,14 +242,14 @@ class CardSec:
     def _know_callback(self):
         try:
             self._root.event_generate(
-                VEV_KNOW_CARD, data=self.card._working_card_id.name)
+                VEV_KNOW_CARD, data=self.card._working_card_id)
         except AttributeError:
             pass
 
     def _dknow_callback(self):
         try:
             self._root.event_generate(
-                VEV_DKNOW_CARD, data=self.card._working_card_id.name)
+                VEV_DKNOW_CARD, data=self.card._working_card_id)
         except AttributeError:
             pass
 
@@ -433,11 +436,11 @@ class CardPopup:
         self._back_txt_box.insert('0.0', '%s\n' %back_txt.strip())
 
     def get_content(self):
-        return (self._card_name_var.get(),
+        return (self._card_name_var.get().strip(),
                 bool(self._learned_var.get()),
-                self._front_img_var.get(),
+                self._front_img_var.get().strip(),
                 self._front_txt_box.get('0.0', 'end').strip(),
-                self._back_img_var.get(),
+                self._back_img_var.get().strip(),
                 self._back_txt_box.get('0.0', 'end').strip())
 
     def close(self):

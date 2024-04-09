@@ -41,14 +41,18 @@ class Card:
     @staticmethod
     def parse_card_dict(card_dict: dict[str, object]) -> dict[str, object]:
         card_dict['creation'] = datetime_from_str(card_dict['creation'])
-        if card_dict['last_revisition'] is not None:
-            card_dict['last_revisition'] = datetime_from_str(
-                card_dict['last_revisition'])
+        if card_dict['last_revision'] is not None:
+            card_dict['last_revision'] = datetime_from_str(
+                card_dict['last_revision'])
 
     @classmethod
     def from_dict(cls, card_dict: dict[str, object]) -> 'Card':
         cls.parse_card_dict(card_dict)
         return Card(**card_dict)
+    
+    def reviewed_today(self) -> bool:
+        return (self.last_revision is not None
+                and self.last_revision.date() == TODAY)
 
 
 
@@ -119,8 +123,9 @@ def get_project_files() -> list[str]:
             projects_files.append(project)
     return projects_files
 
-def load_projects() -> list[Project]:
-    return [Project.from_file(f) for f in get_project_files()]
+def load_projects() -> dict[str, Project]:
+    projects = [Project.from_file(f) for f in get_project_files()]
+    return {p.name: p for p in projects}
 
 def is_valid_name(name: str) -> bool:
     return not (frozenset(name) - VALID_CHARS)
@@ -165,29 +170,19 @@ def project_progress(project: Project):
             'learned_today': learned_today,
             'progress': progress}
 
-def get_revision_groups(cards: list[Card]) -> tuple[list[tuple[Card, int]]]:
-    learned = []
-    reviewed = []
-    to_review = []
-    for card in cards:
-        score = card_score(card)
-        if card.learned:
-            learned.append((card, score))
-        elif card.last_revision.date() == TODAY:
-            reviewed.append((card, score))
-        else:
-            to_review.append((card, score))
-    learned.sort(key=lambda pair: pair[1], reverse=True)
-    reviewed.sort(key=lambda pair: pair[1], reverse=True)
-    to_review.sort(key=lambda pair: pair[1], reverse=True)
-    return to_review, reviewed, learned
+def score_cards(cards: list[Card]) -> list[tuple[Card, int]]:
+    scored_cards = [(c, card_score(c)) for c in cards]
+    scored_cards.sort(key=lambda tp: tp[1], reverse=True)
+    return scored_cards
 
-def add_to_revision_group(
-        card: Card, revision_group: list[tuple[Card, int]]) -> int:
-    score = card_score(card)
-    for i, (_, gcard_score) in enumerate(revision_group):
-        if gcard_score < score:
-            revision_group.insert(i, card)
+def insert_card(
+        card: Card,
+        scored_cards: list[tuple[Card, int]],
+        score: int = None) -> int:
+    score = card_score(card) if score is None else score
+    for i, (_, cscore) in enumerate(scored_cards):
+        if cscore < score:
+            scored_cards.insert(i, (card, score))
             return i
-    revision_group.append(card)
-    return len(revision_group) - 1
+    scored_cards.append((card, score))
+    return len(scored_cards) - 1
