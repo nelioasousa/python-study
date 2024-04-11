@@ -60,3 +60,5 @@ Python simple and compound statements in depth. Focus is on `assert`, `yield`, `
 | Description | Recommendation (1-5) |
 | :---        | :---                 |
 | [PEP 0485 - A Function for testing approximate equality](https://peps.python.org/pep-0485/) | 1 |
+| [PEP 0248 - Python Database API Specification v1.0](https://peps.python.org/pep-0248/) |  |
+| [PEP 0249 - Python Database API Specification v2.0](https://peps.python.org/pep-0249/) |  |
