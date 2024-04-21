@@ -1,21 +1,26 @@
-from datetime import datetime
 import os
 import os.path as osp
+import shutil
+from datetime import datetime
 from typing import Union
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
 from json import load, dump
 from string import ascii_letters, digits
+from PIL import Image
 
 
 
 ROOT = osp.dirname(__file__)
 PROJECTS_DIR = Path(osp.join(ROOT, '.projects'))
-try: os.mkdir(PROJECTS_DIR)
-except FileExistsError: pass
 DATE_FMT = '%m-%d-%Y %H:%M:%S.%f'
 VALID_CHARS = frozenset(''.join((ascii_letters, digits, ' -_')))
 TODAY = datetime.now().date()
+IMG_FMTS = ('.png', '.jpg', '.gif', '.jpeg', '.tiff')
+IMG_LIMITS = (450, 300)
+
+try: os.mkdir(PROJECTS_DIR)
+except FileExistsError: pass
 
 
 
@@ -49,10 +54,33 @@ class Card:
     def from_dict(cls, card_dict: dict[str, object]) -> 'Card':
         cls.parse_card_dict(card_dict)
         return Card(**card_dict)
-    
+
     def reviewed_today(self) -> bool:
         return (self.last_revision is not None
                 and self.last_revision.date() == TODAY)
+
+    def register_review(self, learned: bool):
+        self.num_revisions += 1
+        self.last_revision = datetime.now()
+        self.learned = learned
+
+    def score(self) -> int:
+        score = 0 if self.learned else 100  # Starting score
+        # Number of revisions penalty
+        if self.num_revisions:
+            score = score * 0.98 ** self.num_revisions
+            days_since_revision = max(
+                0, (TODAY - self.last_revision.date()).days)
+        else:
+            days_since_revision = max(0, (TODAY - self.creation.date()).days)
+        # Polygonal function complement:
+        # from 0 to 14 days (2 weeks), each day increments the score by 2
+        # past 14 days, each day increments the score by 0.5
+        if days_since_revision > 14:
+            score += 100 + (days_since_revision - 14) * 2
+        else:
+            score += (100 / 14) * days_since_revision
+        return round(score)
 
 
 
@@ -87,6 +115,12 @@ class Project:
         self.imgs_dir.mkdir(parents=True, exist_ok=True)
 
     @staticmethod
+    def check_name(project_name: str) -> str:
+        if (frozenset(project_name) - VALID_CHARS):
+            return ""
+        return ' '.join(project_name.lower().split())
+
+    @staticmethod
     def parse_project_dict(
             project_dict: dict[str, object]) -> dict[str, object]:
         project_dict['creation'] = datetime_from_str(project_dict['creation'])
@@ -109,9 +143,39 @@ class Project:
             dump(asdict(self), proj_file, default=dump_default, indent=4)
 
     def delete(self):
-        os.rename(
-            self.save_dir,
-            self.save_dir.parent / 'trash' / self.save_dir.name)
+        destination = self.save_dir.parent / 'trash' / self.save_dir.name
+        if osp.isdir(destination):  # Project with the same name already deleted
+            shutil.rmtree(destination)
+        shutil.move(self.save_dir, destination, copy_function=shutil.copyfile)
+
+    def _cards_info(self):
+        today_revisions = 0
+        today_learnings = 0
+        total_learnings = 0
+        for card in self.cards.values():
+            total_learnings += card.learned
+            if card.last_revision and card.last_revision.date() == TODAY:
+                today_revisions += 1
+                today_learnings += card.learned
+        return (today_revisions, today_learnings, total_learnings)
+
+    def last_studied(self):
+        last_studied = self.creation
+        for card in self.cards.values():
+            if (card.last_revision and last_studied < card.last_revision):
+                last_studied = card.last_revision
+        return last_studied
+
+    def progress(self):
+        today_revisions, today_learnings, total_learnings = self._cards_info()
+        last_studied = self.last_studied()
+        progress = (
+            100 * total_learnings / len(self.cards) if self.cards else 0.0)
+        return {'last_studied': last_studied,
+                'today_revisions': today_revisions,
+                'today_learnings': today_learnings,
+                'total_learnings': total_learnings,
+                'progress': progress}
 
 
 
@@ -127,62 +191,45 @@ def load_projects() -> dict[str, Project]:
     projects = [Project.from_file(f) for f in get_project_files()]
     return {p.name: p for p in projects}
 
-def is_valid_name(name: str) -> bool:
-    return not (frozenset(name) - VALID_CHARS)
+def clear_whitespaces(string: str):
+    return ' '.join(string.split())
 
-def card_score(card: Card) -> int:
-    score = 0 if card.learned else 100  # starting score
-    # number of days since last revision complement
-    if card.num_revisions:
-        # number of revisions penalty
-        score = score * 0.98 ** card.num_revisions
-        days_since_revision = max(0, (TODAY - card.last_revision.date()).days)
-    else:
-        days_since_revision = 0
-    # polygonal function complement:
-    # from 0 to 14 days (2 weeks), each day increments the score by 2
-    # past 14 days, each day increments the score by 0.5
-    if days_since_revision > 14:
-        score += 100 + (days_since_revision - 14) * 2
-    else:
-        score += (100 / 14) * days_since_revision
-    return round(score)
-
-def project_progress(project: Project):
-    last_studied = None
-    learned_total = 0
-    reviewed_today = 0
-    learned_today = 0
-    for card in project.cards.values():
-        learned_total += card.learned
-        try:
-            if card.last_revision > last_studied:
-                last_studied = card.last_revision
-        except TypeError:
-            pass
-        if card.last_revision.date() == TODAY:
-            reviewed_today += 1
-            if card.learned:
-                learned_today += 1
-    progress = 100 * learned_total / len(project.cards)
-    return {'last_studied': last_studied,
-            'reviewed_today': reviewed_today,
-            'learned_today': learned_today,
-            'progress': progress}
-
-def score_cards(cards: list[Card]) -> list[tuple[Card, int]]:
-    scored_cards = [(c, card_score(c)) for c in cards]
-    scored_cards.sort(key=lambda tp: tp[1], reverse=True)
-    return scored_cards
-
-def insert_card(
-        card: Card,
-        scored_cards: list[tuple[Card, int]],
-        score: int = None) -> int:
-    score = card_score(card) if score is None else score
-    for i, (_, cscore) in enumerate(scored_cards):
-        if cscore < score:
-            scored_cards.insert(i, (card, score))
+def insert_card(card: Card, cards: list[Card]) -> int:
+    score = card.score()
+    for i, c in enumerate(cards):
+        if c.score() < score:
+            cards.insert(i, card)
             return i
-    scored_cards.append((card, score))
-    return len(scored_cards) - 1
+    cards.append(card)
+    return len(cards) - 1
+
+def check_image(img_path: str) -> bool:
+    return osp.isfile(img_path) and osp.splitext(img_path)[1] in IMG_FMTS
+
+def process_image(img_path: str, destination: str) -> Union[None, str]:
+    if osp.isdir(destination):
+        destination = osp.join(destination, osp.basename(img_path))
+    if osp.isfile(destination):
+        return destination  # Assume that the image has been processed before
+    if not osp.isdir(osp.dirname(destination)):
+        return None  # All folders must already exist
+    if not destination.endswith(osp.splitext(img_path)[1]):
+        destination = "%s%s" %(
+            osp.splitext(destination)[0], osp.splitext(img_path)[1])
+    try:
+        with Image.open(img_path) as img:
+            w, h = img.size
+            if w <= IMG_LIMITS[0] and h <= IMG_LIMITS[1]:
+                shutil.copyfile(img_path, destination)
+                return destination
+            if (w / IMG_LIMITS[0]) > (h / IMG_LIMITS[1]):
+                nw = IMG_LIMITS[0]
+                nh = round(nw * h / w)
+            else:
+                nh = IMG_LIMITS[1]
+                nw = round(nh * w / h)
+            resized = img.resize((nw, nh))
+            resized.save(destination)
+            return destination
+    except FileNotFoundError:
+        return None

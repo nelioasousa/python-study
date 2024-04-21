@@ -57,3 +57,12 @@ The app layout is sketched in [app_layout.png](./app_layout.png). Each color rep
 
 ## Controller
 Similarly to the View, little planning will be done for the Controller, and the problem will be approached in an experimental way. The Controller will essentially manage how to handle the generated events, calling the update methods within the `Screen` class.
+
+# Notes
+1. I was quite inefficient coding this app;
+2. There's just one thread, so the app can freeze when a large computation takes place. However, the more complex calculations are just O(n), with n being the number of flash cards in a single project;
+3. The filtering functionality for flash cards hasn't been implemented yet;
+4. There's no OOP for the [controller](./main.py), just pure functional programming;
+5. I think that Tkinter syntax makes code a bit messy, but I believe the [/views](./views/) can be made more readable;
+6. I'm probably skipping some useful checks in the controller and in the views to make sure the user can't break the app;
+7. The [model](./model.py) is way better organized that the rest. But I think that the rest in more readable without annotations.

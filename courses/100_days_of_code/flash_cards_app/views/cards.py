@@ -92,82 +92,85 @@ class CardsSec:
         self._frame.rowconfigure(1, weight=1)
         self._frame.configure(borderwidth=5, relief='groove')
 
-    def set_working_card(self, cid=None):
+    def set_working_card(self, name=None):
         try:
             self._cards_tree_list.item(self._selected, tags=(self._dclick,))
         except tk.TclError:
             pass
-        if cid is None:
+        if name is None:
             self._selected = None
             self._delete_btn.state(['disabled'])
             self._root.event_generate(VEV_CARD_NONE)
         else:
-            self._selected = cid
-            self._cards_tree_list.item(cid, tags=(self._dclick, self._slct))
+            self._selected = name
+            self._cards_tree_list.item(name, tags=(self._dclick, self._slct))
             self._delete_btn.state(['!disabled'])
-            self._root.event_generate(VEV_CARD_SET, data=cid)
+            self._root.event_generate(VEV_CARD_SET, data=name)
 
-    def insert_card(self, cid, name, score, idx='end'):
+    def get_working_card(self):
+        return self._selected
+
+    def insert_card(self, name, score, idx='end'):
         self._cards_tree_list.insert(
-            '', idx, cid, text=name, values=score, tags=(self._dclick,))
+            '', idx, name, text=name, values=score, tags=(self._dclick,))
 
-    def extend_cards(self, cids, names, scores, at=None):
+    def extend_cards(self, names, scores, at=None):
         if at is None:
-            for cid, name, score in zip(cids, names, scores):
+            for name, score in zip(names, scores):
                 self._cards_tree_list.insert(
-                    '', 'end', cid, text=name,
-                    values=score, tags=(self._dclick,))
+                    '', 'end', name,
+                    text=name, values=score, tags=(self._dclick,))
         else:
-            for cid, name, score in zip(cids, names, scores):
+            for name, score in zip(names, scores):
                 self._cards_tree_list.insert(
-                    '', at, cid, text=name,
-                    values=score, tags=(self._dclick,))
+                    '', at, name,
+                    text=name, values=score, tags=(self._dclick,))
                 at += 1
 
-    def remove_card(self, cid):
-        try: self._detached_cards.remove(cid)
+    def remove_card(self, name):
+        try: self._detached_cards.remove(name)
         except ValueError: pass
-        self._cards_tree_list.delete(cid)
+        self._cards_tree_list.delete(name)
 
     def pop_card(self, idx=-1):
         try:
-            cid = self._cards_tree_list.get_children()[idx]
+            cname = self._cards_tree_list.get_children()[idx]
         except IndexError:
             return None
-        self._cards_tree_list.delete(cid)
-        return cid
+        self._cards_tree_list.delete(cname)
+        return cname
 
-    def detach_card_by_id(self, cid):
-        if cid in self._detached_cards:
+    def detach_card(self, name):
+        if name in self._detached_cards:
             return None
-        idx = self._cards_tree_list.index(cid)
-        self._cards_tree_list.selection_remove(cid)
-        self._cards_tree_list.detach(cid)
-        self._detached_cards.append(cid)
+        idx = self._cards_tree_list.index(name)
+        self._cards_tree_list.selection_remove(name)
+        self._cards_tree_list.detach(name)
+        self._detached_cards.append(name)
         return idx
 
     def detach_card_by_index(self, idx):
         try:
-            cid = self._cards_tree_list.get_children()[idx]
+            name = self._cards_tree_list.get_children()[idx]
         except IndexError:
             return None
-        self._cards_tree_list.selection_remove(cid)
-        self._cards_tree_list.detach(cid)
-        self._detached_cards.append(cid)
-        return cid
+        self._cards_tree_list.selection_remove(name)
+        self._cards_tree_list.detach(name)
+        self._detached_cards.append(name)
+        return name
 
-    def reattach_card(self, cid, idx='end'):
+    def reattach_card(self, name, idx='end'):
         try:
-            self._detached_cards.remove(cid)
+            self._detached_cards.remove(name)
         except ValueError:
             return False
-        self._cards_tree_list.reattach(cid, '', idx)
+        self._cards_tree_list.reattach(name, '', idx)
         return True
 
-    def switch_card_by_id(self, cid, new_idx):
-        if cid in self._detached_cards:
+    def switch_card(self, name, new_idx):
+        if name in self._detached_cards:
             return False
-        old_idx = self._cards_tree_list.index(cid)
+        old_idx = self._cards_tree_list.index(name)
         return self.switch_card_by_index(old_idx, new_idx)
 
     def switch_card_by_index(self, old_idx, new_idx):
@@ -178,16 +181,16 @@ class CardsSec:
                             else (new_idx, old_idx))
         children = self._cards_tree_list.get_children()
         try:
-            cid_min = children[min_idx]
+            cname_min = children[min_idx]
         except IndexError:
             return False
         try:
-            cid_max = children[max_idx]
+            cname_max = children[max_idx]
         except IndexError:
-            self._cards_tree_list.move(cid_min, '', 'end')
+            self._cards_tree_list.move(cname_min, '', 'end')
             return True
-        self._cards_tree_list.move(cid_max, '', min_idx)
-        self._cards_tree_list.move(cid_min, '', max_idx)
+        self._cards_tree_list.move(cname_max, '', min_idx)
+        self._cards_tree_list.move(cname_min, '', max_idx)
         return True
 
     def remove_all_cards(self):

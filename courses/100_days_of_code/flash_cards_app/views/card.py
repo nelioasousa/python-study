@@ -4,23 +4,23 @@ from tkinter.filedialog import askopenfilename
 from PIL import Image
 from PIL.ImageTk import PhotoImage
 from os.path import normpath
+from model import IMG_FMTS
 
-
-all = ["VEV_EDIT_CARD",
-       "VEV_CARD_FLIPPED",
-       "VEV_KNOW_CARD",
-       "VEV_DKNOW_CARD",
-       "VEV_CARD_POPUP_CANCEL",
-       "VEV_CARD_POPUP_CONCLUDE",
-       "CardSec",
-       "CardPopup"]
+__all__ = ["VEV_CARD_EDIT",
+           "VEV_CARD_FLIPPED",
+           "VEV_KNOW_CARD",
+           "VEV_DKNOW_CARD",
+           "VEV_CARD_POPUP_CANCEL",
+           "VEV_CARD_POPUP_CONCLUDE",
+           "CardSec",
+           "CardPopup"]
 
 
 def load_tk_photoimage(img_path):
     return PhotoImage(Image.open(img_path))
 
 
-VEV_EDIT_CARD = '<<EditCard>>'
+VEV_CARD_EDIT = '<<CardEdit>>'
 VEV_CARD_FLIPPED = '<<CardFlipped>>'
 
 
@@ -48,12 +48,11 @@ class Card:
             self._canvas, text='Flip', state='disabled',
             command=self._flip_callback)
         # Working card id
-        self._working_card_id = None
+        self._working_card = None
         ## Image
         # Canvas widget do not keep a referente to the image object
         # A reference to the image object must be explicity created
         # ... so it won't be garbage colected
-        # Max width: 450; Max height: 300
         self._front_img_id = None
         self._front_img = None
         self._back_img_id = None
@@ -96,10 +95,10 @@ class Card:
     def set_as_empty(self):
         self._remove_images()
         self._remove_texts()
-        self._working_card_id = None
+        self._working_card = None
         self._side_var.set('Front')
-        self._set_text('Empty...', self._center, 'front')
-        self._set_text('Empty...', self._center, 'back', 'hidden')
+        self._set_text('', self._center, 'front')
+        self._set_text('', self._center, 'back', 'hidden')
         self.disable_buttons('edit')
 
     def _hide_item(self, item_id):
@@ -145,7 +144,7 @@ class Card:
             card_back_img, card_back_txt):
         self._remove_images()
         self._remove_texts()
-        self._working_card_id = card_id
+        self._working_card = card_id
         self._side_var.set('Front')
         # Card front
         if card_front_img and card_front_txt:
@@ -187,7 +186,8 @@ class Card:
             self._flip_btn['state'] = '!disabled'
 
     def _edit_callback(self):
-        self._root.event_generate(VEV_EDIT_CARD)
+        if self._working_card is not None:
+            self._root.event_generate(VEV_CARD_EDIT, data=self._working_card)
 
     def _flip_callback(self):
         if self._side_var.get() == 'Front':
@@ -242,14 +242,14 @@ class CardSec:
     def _know_callback(self):
         try:
             self._root.event_generate(
-                VEV_KNOW_CARD, data=self.card._working_card_id)
+                VEV_KNOW_CARD, data=self.card._working_card)
         except AttributeError:
             pass
 
     def _dknow_callback(self):
         try:
             self._root.event_generate(
-                VEV_DKNOW_CARD, data=self.card._working_card_id)
+                VEV_DKNOW_CARD, data=self.card._working_card)
         except AttributeError:
             pass
 
@@ -382,19 +382,23 @@ class CardPopup:
         return cls(root, 'creation')
 
     @classmethod
-    def card_edition_popup(cls, root, card):
+    def card_edition_popup(cls, root,
+                           name, learned,
+                           front_img, front_txt,
+                           back_img, back_txt):
         popup = cls(root, 'edition')
-        popup.set_content(name=card.name,
-                          learned=card.learned,
-                          front_img=card.fimg,
-                          front_txt=card.ftxt,
-                          back_img=card.bimg,
-                          back_txt=card.btxt)
+        popup.card_original_name = name
+        popup.set_content(name=name,
+                          learned=learned,
+                          front_img=front_img,
+                          front_txt=front_txt,
+                          back_img=back_img,
+                          back_txt=back_txt)
         return popup
 
     def _ask_img_file(self) -> str:
         # Pillow read and write supported files
-        fmts = (('Image', ('.png', '.jpg', '.gif', '.jpeg', '.tiff')),)
+        fmts = (('Image', IMG_FMTS),)
         return askopenfilename(parent=self._popup,
                                title='Select a image file',
                                initialdir='~', filetypes=fmts)

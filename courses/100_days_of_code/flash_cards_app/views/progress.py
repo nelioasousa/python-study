@@ -67,25 +67,25 @@ class ProgressSec:
     def set_last_studied(self, datetime_str):
         self._last_studied_var.set(datetime_str)
 
-    def set_todays_reviews(self, num_reviewed):
+    def set_today_revisions(self, num_reviewed):
         self._reviewed_today_var.set(str(num_reviewed))
 
-    def increment_todays_reviews(self, increment=1):
+    def increment_today_reviews(self, increment=1):
         num_rv = int(self._reviewed_today_var.get())
-        self.set_todays_reviews(num_rv + increment)
+        self.set_today_revisions(num_rv + increment)
 
-    def set_todays_learnings(self, num_learned):
+    def set_today_learnings(self, num_learned):
         self._learned_today_var.set(str(num_learned))
 
-    def increment_todays_learnings(self, increment=1):
+    def increment_today_learnings(self, increment=1):
         num_lr = int(self._learned_today_var.get())
-        self.set_todays_learnings(num_lr + increment)
+        self.set_today_learnings(num_lr + increment)
 
     def reset(self):
         self.set_progress(0.0)
         self.set_last_studied('')
-        self.set_todays_reviews('')
-        self.set_todays_learnings('')
+        self.set_today_revisions('')
+        self.set_today_learnings('')
 
     def _grid(self, *, row, column,
               rowspan=1, columnspan=1, sticky='', **kwargs):
