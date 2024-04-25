@@ -6,7 +6,7 @@ Courses are available on [Dr. Fred Baptiste's Udemy profile](https://www.udemy.c
 The course videos are very good, with high sound quality, providing additional information beyond what is covered in the notebooks and getting straight to the point. However, the Jupyter notebooks are a bit poorly formatted, but it's nothing to worry about. Another downside is that some courses in the series do not offer many practical applications for the extensive theory covered in the videos and notebooks. Including more code challenges, projects, or practical application examples would be cool.
 
 # Checklist
-- [ ] Part 1: Functional
+- [x] Part 1: Functional
 - [ ] Part 2: Iterators and Generators
 - [ ] Part 3: Dictionaries, Sets, JSON
 - [ ] Part 4: OOP
