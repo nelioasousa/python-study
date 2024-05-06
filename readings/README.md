@@ -13,12 +13,13 @@ About code documentation, self-documenting code, clean code, and others.
 | [PEP 0484 - Type Hints](https://peps.python.org/pep-0484/) | 3 |
 | [PEP 0526 - Syntax for Variable Annotations](https://peps.python.org/pep-0526/) | 3 |
 
-## Standard library - Development Tools
+## Standard library
 Focus is on the typing and unittest modules.
 
 | Description | Recommendation (1-5) |
 | :---        | :---                 |
-| [typing - Support for type hints](https://docs.python.org/3/library/typing.html) |  |
+| [datetime — Basic date and time types](https://docs.python.org/3/library/datetime.html) | 4 |
+| [typing — Support for type hints](https://docs.python.org/3/library/typing.html) |  |
 | [unittest — Unit testing framework](https://docs.python.org/3/library/unittest.html) |  |
 
 ## Python statements
