@@ -18,9 +18,19 @@ Focus is on the typing and unittest modules.
 
 | Description | Recommendation (1-5) |
 | :---        | :---                 |
-| [datetime — Basic date and time types](https://docs.python.org/3/library/datetime.html) | 4 |
-| [typing — Support for type hints](https://docs.python.org/3/library/typing.html) |  |
-| [unittest — Unit testing framework](https://docs.python.org/3/library/unittest.html) |  |
+| [typing - Support for type hints](https://docs.python.org/3/library/typing.html) |  |
+| [unittest - Unit testing framework](https://docs.python.org/3/library/unittest.html) |  |
+
+## Datetime
+Date and time, time zones, localization, and others.
+
+| Description | Recommendation (1-5) |
+| :---        | :---                 |
+| [datetime - Basic date and time types](https://docs.python.org/3/library/datetime.html) | 4 |
+| [zoneinfo - IANA time zone support](https://docs.python.org/3/library/zoneinfo.html) | 4 |
+| [tzdata: Python package providing IANA time zone data](https://tzdata.readthedocs.io/en/latest/) | |
+| [PEP 0495 - Local Time Disambiguation](https://peps.python.org/pep-0495/) | |
+| [PEP 0615 - Support for the IANA Time Zone Database in the Standard Library](https://peps.python.org/pep-0615/) | |
 
 ## Python statements
 Python simple and compound statements in depth. Focus is on `assert`, `yield`, `import`, `try`, `with`, `match`, and Coroutines.
@@ -31,7 +41,7 @@ Python simple and compound statements in depth. Focus is on `assert`, `yield`, `
 | [PEP 0634 - Structural Pattern Matching: Specification](https://peps.python.org/pep-0634/) | 3 |
 | [PEP 0635 - Structural Pattern Matching: Motivation and Rationale](https://peps.python.org/pep-0635/) |  |
 | [Python Reference - The with statement](https://docs.python.org/3/reference/compound_stmts.html#the-with-statement) |  |
-| [PEP 0343 – The “with” Statement](https://peps.python.org/pep-0343/) |  |
+| [PEP 0343 - The “with” Statement](https://peps.python.org/pep-0343/) |  |
 | [Python Reference - The try statement](https://docs.python.org/3/reference/compound_stmts.html#the-try-statement) |  |
 
 ## OOP
