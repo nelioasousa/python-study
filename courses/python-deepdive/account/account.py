@@ -18,16 +18,15 @@ AccountTransaction = namedtuple(
     "transaction_id,timestamp_loc,timestamp_utc")
 
 
-def custom_timezone(
-        offset_hours=0,
-        offset_minutes=0,
-        offset_seconds=0):
+def build_timezone(offset_hours=0, offset_minutes=0, offset_seconds=0):
+    """Basic timezone builder. Do not account for Daylight Saving Time."""
     offset = timedelta(
         hours=offset_hours, minutes=offset_minutes, seconds=offset_seconds)
     return timezone(offset=offset)
 
 
 class Account:
+    """Simulate basic bank account operations."""
     _interest = 0.0
     _next_transaction_id = 0
     _compact_datetime_fmt = "%Y%m%d%H%M%S%f"
@@ -41,10 +40,10 @@ class Account:
             balance=0.0,
             tz=None):
         self._number = account_number
-        self._first_name = self._check_name(first_name)
-        self._last_name = self._check_name(last_name)
-        self._balance = balance if balance >= 0.0 else 0.0
-        self._timezone = timezone.utc if tz is None else tz
+        self.first_name = first_name
+        self.last_name = last_name
+        self._set_balance(balance)
+        self.timezone = tz
     
     @staticmethod
     def _check_name(name):
@@ -65,26 +64,28 @@ class Account:
 
     @classmethod
     def set_interest(cls, interest):
-        # No range of values specified by business logic
-        # Accepts any value that can be converted to a float
-        try:
-            cls._interest = float(interest)
-            return True
-        except (ValueError, TypeError):
-            return False
+        cls._interest = float(interest)
     
     @classmethod
-    def _string_from_datetime(cls, x, /):
+    def compact_string_from_datetime(cls, x, /):
         return x.strftime(cls._compact_datetime_fmt)
     
     @classmethod
-    def _datetime_from_string(cls, x, /):
+    def datetime_from_compact_string(cls, x, /):
         naive_dt = datetime.strptime(x, cls._compact_datetime_fmt)
         return naive_dt.replace(tzinfo=timezone.utc)
     
     @classmethod
-    def _readable_string_from_datetime(cls, x, /):
+    def readable_string_from_datetime(cls, x, /):
         return x.strftime(cls._readable_datetime_fmt)
+    
+    @classmethod
+    def datetime_from_readable_string(cls, x, /):
+        return datetime.strptime(x, cls._readable_datetime_fmt)
+
+    @property
+    def number(self):
+        return self._number
 
     @property
     def first_name(self):
@@ -107,21 +108,38 @@ class Account:
         return "%s %s" %(self.first_name, self.last_name)
 
     @property
+    def timezone(self):
+        return self._timezone
+    
+    @timezone.setter
+    def timezone(self, tz):
+        if tz is None:
+            self._timezone = timezone.utc
+        elif not isinstance(tz, timezone):
+            raise ValueError("tz must be an instance of datetime.timezone")
+        else:
+            self._timezone = tz
+
+    @timezone.deleter
+    def timezone(self):
+        self._timezone = timezone.utc
+
+    @property
     def balance(self):
         return self._balance
     
-    def _set_balance(self, value):
-        value = float(value)
-        if value >= 0.0:  # Negative balance not allowed
-            self._balance = value
+    def _set_balance(self, balance):
+        balance = float(balance)
+        if balance < 0.0:
+            raise ValueError("Negative balance not allowed")
         else:
-            raise ValueError("value must be >= 0.0")
+            self._balance = balance
 
     def _generate_transaction_string(self, transaction_code):
         dt = datetime.now(timezone.utc)
         return "%s-%d-%s-%d" %(transaction_code,
-                               self._number,
-                               self._string_from_datetime(dt),
+                               self.number,
+                               self.compact_string_from_datetime(dt),
                                self._get_transaction_id())
 
     def process_monthly_interest(self):
@@ -148,11 +166,11 @@ class Account:
     
     def parse_transaction_string(self, transaction_string):
         portions = transaction_string.split('-')
-        datetime_utc = self._datetime_from_string(portions[2])
-        datetime_loc = datetime_utc.astimezone(self._timezone)
+        datetime_utc = self.datetime_from_compact_string(portions[2])
+        datetime_loc = datetime_utc.astimezone(self.timezone)
         return AccountTransaction(
             account_number=int(portions[1]),
             transaction_code=portions[0],
             transaction_id=int(portions[3]),
-            timestamp_loc=self._readable_string_from_datetime(datetime_loc),
-            timestamp_utc=self._readable_string_from_datetime(datetime_utc))
+            timestamp_loc=self.readable_string_from_datetime(datetime_loc),
+            timestamp_utc=self.readable_string_from_datetime(datetime_utc))
