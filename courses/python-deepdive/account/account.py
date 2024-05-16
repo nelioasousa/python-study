@@ -116,7 +116,7 @@ class Account:
         if tz is None:
             self._timezone = timezone.utc
         elif not isinstance(tz, timezone):
-            raise ValueError("tz must be an instance of datetime.timezone")
+            raise TypeError("tz must be an instance of datetime.timezone")
         else:
             self._timezone = tz
 
@@ -151,6 +151,8 @@ class Account:
         return self._generate_transaction_string('I')
     
     def withdraw(self, value):
+        if value < 0:
+            raise ValueError("value must be non-negative")
         try:
             self._set_balance(self.balance - round(value, 2))
         except (ValueError, TypeError):
@@ -158,6 +160,8 @@ class Account:
         return self._generate_transaction_string('W')
 
     def deposit(self, value):
+        if value < 0:
+            raise ValueError("value must be non-negative")
         try:
             self._set_balance(self.balance + round(value, 2))
         except (ValueError, TypeError):

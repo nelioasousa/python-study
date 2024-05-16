@@ -19,7 +19,7 @@ Focus is on the typing and unittest modules.
 | Description | Recommendation (1-5) |
 | :---        | :---                 |
 | [typing - Support for type hints](https://docs.python.org/3/library/typing.html) |  |
-| [unittest - Unit testing framework](https://docs.python.org/3/library/unittest.html) |  |
+| [unittest - Unit testing framework](https://docs.python.org/3/library/unittest.html) | 4 |
 
 ## Datetime
 Date and time, time zones, localization, and others.
