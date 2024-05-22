@@ -20,6 +20,8 @@ Focus is on the typing and unittest modules.
 | :---        | :---                 |
 | [typing - Support for type hints](https://docs.python.org/3/library/typing.html) |  |
 | [unittest - Unit testing framework](https://docs.python.org/3/library/unittest.html) | 4 |
+| [ensurepip - Bootstrapping the pip installer](https://docs.python.org/3/library/ensurepip.html) | 3 |
+| [sysconfig - Provide access to Python’s configuration information](https://docs.python.org/3/library/sysconfig.html) |  |
 
 ## Datetime
 Date and time, time zones, localization, and others.
@@ -66,6 +68,15 @@ Python simple and compound statements in depth. Focus is on `assert`, `yield`, `
 | Description | Recommendation (1-5) |
 | :---        | :---                 |
 | [Pydantic](https://docs.pydantic.dev/latest/concepts/models/) |  |
+
+## Packages
+| Description | Recommendation (1-5) |
+| :---        | :---                 |
+| [pip documentation - Installation](https://pip.pypa.io/en/stable/installation/) | 5 |
+| [Installing pip/setuptools/wheel with Linux Package Managers](https://packaging.python.org/en/latest/guides/installing-using-linux-tools/) | 5 |
+| [Understanding site-packages directories](https://discuss.python.org/t/understanding-site-packages-directories/12959) | 3 |
+| [Overview of Python Packaging](https://packaging.python.org/en/latest/overview/) |  |
+| [Python, Debian, and the install locations](https://ffy00.github.io/blog/02-python-debian-and-the-install-locations/) |  |
 
 ## Others
 | Description | Recommendation (1-5) |
