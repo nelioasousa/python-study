@@ -52,6 +52,8 @@ Python simple and compound statements in depth. Focus is on `assert`, `yield`, `
 | [What are metaclasses in Python?](https://stackoverflow.com/q/100003) | 4 |
 | [PEP 3115 - Metaclasses in Python 3000](https://peps.python.org/pep-3115/) | 4 |
 | [PEP 0557 - Data Classes](https://peps.python.org/pep-0557/) | 5 |
+| [Class diagram](https://en.wikipedia.org/wiki/Class_diagram) | 4 |
+| [Class diagrams](https://mermaid.js.org/syntax/classDiagram.html) |  |
 | [Usage of __slots__?](https://stackoverflow.com/q/472000) |  |
 | [PEP 3141 - A Type Hierarchy for Numbers](https://peps.python.org/pep-3141/) |  |
 
