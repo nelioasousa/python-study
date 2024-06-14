@@ -1,6 +1,11 @@
 # Python readings
 Mapping Python readings.
 
+## Descriptors
+| Description | Recommendation (1-5) |
+| :---        | :---                 |
+| [Descriptor Guide](https://docs.python.org/3/howto/descriptor.html) | 5 |
+
 ## Code documentation
 About code documentation, self-documenting code, clean code, and others.
 
