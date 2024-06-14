@@ -75,16 +75,16 @@ Python simple and compound statements in depth. Focus is on `assert`, `yield`, `
 | Description | Recommendation (1-5) |
 | :---        | :---                 |
 | [pip documentation - Installation](https://pip.pypa.io/en/stable/installation/) | 5 |
-| [Overview of Python Packaging](https://packaging.python.org/en/latest/overview/) |  |
+| [Overview of Python Packaging](https://packaging.python.org/en/latest/overview/) | 3 |
 
 ## Unix/Linux/Debian
 | Description | Recommendation (1-5) |
 | :---        | :---                 |
 | [Understanding site-packages directories](https://discuss.python.org/t/understanding-site-packages-directories/12959) | 3 |
 | [Installing pip/setuptools/wheel with Linux Package Managers](https://packaging.python.org/en/latest/guides/installing-using-linux-tools/) | 5 |
-| [Python, Debian, and the install locations](https://ffy00.github.io/blog/02-python-debian-and-the-install-locations/) |  |
-| [Negative Python user experience on Debian/Ubuntu](https://gist.github.com/tiran/2dec9e03c6f901814f6d1e8dad09528e) |  |
-| [Using Python on Unix platforms](https://docs.python.org/3/using/unix.html) |  |
+| [Python, Debian, and the install locations](https://ffy00.github.io/blog/02-python-debian-and-the-install-locations/) | 4 |
+| [Negative Python user experience on Debian/Ubuntu](https://gist.github.com/tiran/2dec9e03c6f901814f6d1e8dad09528e) | 3 |
+| [Using Python on Unix platforms](https://docs.python.org/3/using/unix.html) | 2 |
 | [Setup and building](https://devguide.python.org/getting-started/setup-building/) |  |
 
 ## Others
