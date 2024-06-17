@@ -10,8 +10,14 @@ class StringValidatorTest(unittest.TestCase):
         obj = DummyClass()
         obj.field = 'example'
         self.assertEqual(vars(obj)['field'], 'example')
-        with self.assertRaises(TypeError):
-            obj.field = 69
+    
+    def test_invalid_assigments(self):
+        class DummyClass:
+            field = StringValidator()
+        obj = DummyClass()
+        for i, value in enumerate((69, 1/3, tuple(), list(), range(5))):
+            with (self.subTest(subtest=i), self.assertRaises(TypeError)):
+                obj.field = value
 
     def test_descriptor_storage(self):
         class DummyClass:
@@ -20,21 +26,18 @@ class StringValidatorTest(unittest.TestCase):
         obj.field = 'example'
         self.assertIn(obj, DummyClass.field.store)
         self.assertEqual(DummyClass.field.store.get(obj, None), 'example')
-        with self.assertRaises(TypeError):
-            obj.field = 69
         del obj
         self.assertFalse(DummyClass.field.store)
 
     def test_slotted_classes(self):
         # https://github.com/python/cpython/issues/77757
         # Exceptions raised by __set_name__ are wrapped by RuntimeError
-        try:
+        with self.assertRaises(RuntimeError) as cm:
             class DummySlottedClass:
                 __slots__ = ('field', )
                 string_field = StringValidator()
         # AttributeError expected from __set_name__
-        except RuntimeError as e:
-            self.assertIsInstance(e.__cause__, AttributeError)
+        self.assertIsInstance(cm.exception.__cause__, AttributeError)
 
     def test_length_contraints(self):
         class DummyClass:
@@ -50,11 +53,20 @@ class StringValidatorTest(unittest.TestCase):
             obj.field = '12345678'
 
     def test_preprocessor(self):
-        class DummyClass:
-            field = StringValidator(preprocessor=(lambda s: s.lower()))
-        obj = DummyClass()
-        obj.field = 'HeLLo'
-        self.assertEqual(obj.field, 'hello')
+        with self.subTest(subtest='string_preprocessing'):
+            class DummyClass:
+                field = StringValidator(preprocessor=(lambda s: s.lower()))
+            obj = DummyClass()
+            obj.field = 'HeLLo'
+            self.assertEqual(obj.field, 'hello')
+        with self.subTest(subtest='conversion_to_string'):
+            class AnotherDummy:
+                field = StringValidator(preprocessor=(lambda v: str(v)))
+            obj = AnotherDummy()
+            obj.field = 69
+            self.assertEqual(obj.field, str(69))
+            obj.field = [1, 2, 3]
+            self.assertEqual(obj.field, str([1, 2, 3]))
 
     def test_preprocessor_and_length_contraints(self):
         class DummyClass:
@@ -77,31 +89,34 @@ class NumberValidatorTest(unittest.TestCase):
         obj = DummyClass()
         obj.field = 5000
         self.assertEqual(vars(obj)['field'], 5000)
-        with self.assertRaises(TypeError):
-            obj.field = 'hi'
 
     def test_descriptor_storage(self):
         class DummyClass:
             field = NumberValidator(store_in_descriptor=True)
         obj = DummyClass()
-        obj.field = 9999.5
+        obj.field = 9999.9
         self.assertIn(obj, DummyClass.field.store)
-        self.assertEqual(DummyClass.field.store.get(obj, None), 9999.5)
-        with self.assertRaises(TypeError):
-            obj.field = [9, 9, 9, 9, 0.5]
+        self.assertEqual(DummyClass.field.store.get(obj, None), 9999.9)
         del obj
         self.assertFalse(DummyClass.field.store)
+
+    def test_invalid_assigments(self):
+        class DummyClass:
+            field = NumberValidator()
+        obj = DummyClass()
+        for i, value in enumerate(('hi', tuple(), list(), range(5))):
+            with (self.subTest(subtest=i), self.assertRaises(TypeError)):
+                obj.field = value
 
     def test_slotted_classes(self):
         # https://github.com/python/cpython/issues/77757
         # Exceptions raised by __set_name__ are wrapped by RuntimeError
-        try:
+        with self.assertRaises(RuntimeError) as cm:
             class DummySlottedClass:
                 __slots__ = ('field', )
                 number_field = NumberValidator()
         # AttributeError expected from __set_name__
-        except RuntimeError as e:
-            self.assertIsInstance(e.__cause__, AttributeError)
+        self.assertIsInstance(cm.exception.__cause__, AttributeError)
 
     def test_size_contraints(self):
         class DummyClass:

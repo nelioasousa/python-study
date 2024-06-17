@@ -48,10 +48,14 @@ class StringValidator(Validator):
         self.preprocessor = preprocessor
 
     def validate(self, value):
+        if self.preprocessor is not None:
+            try:
+                value = self.preprocessor(value)
+            except Exception:
+                raise TypeError(
+                    f'preprocessor broke while processing {value!r}')
         if not isinstance(value, str):
             raise TypeError(f'Expected {value!r} to be an str')
-        if self.preprocessor is not None:
-            value = self.preprocessor(value)
         if self.min_length is not None and len(value) < self.min_length:
             raise ValueError(
                 f'Expected {value!r} to be no smaller than {self.min_length!r}')
