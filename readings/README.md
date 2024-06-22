@@ -26,7 +26,10 @@ Focus is on the typing and unittest modules.
 | [typing - Support for type hints](https://docs.python.org/3/library/typing.html) |  |
 | [unittest - Unit testing framework](https://docs.python.org/3/library/unittest.html) | 4 |
 | [ensurepip - Bootstrapping the pip installer](https://docs.python.org/3/library/ensurepip.html) | 3 |
+| [enum - Support for enumerations](https://docs.python.org/3/library/enum.html) | 4 |
 | [sysconfig - Provide access to Python’s configuration information](https://docs.python.org/3/library/sysconfig.html) |  |
+| [PEP 435 - Adding an Enum type to the Python standard library](https://peps.python.org/pep-0435/) |  |
+| [Enum HOWT](https://docs.python.org/3/howto/enum.html) |  |
 
 ## Datetime
 Date and time, time zones, localization, and others.
