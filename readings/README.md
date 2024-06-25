@@ -29,7 +29,7 @@ Focus is on the typing and unittest modules.
 | [enum - Support for enumerations](https://docs.python.org/3/library/enum.html) | 4 |
 | [sysconfig - Provide access to Python’s configuration information](https://docs.python.org/3/library/sysconfig.html) |  |
 | [PEP 435 - Adding an Enum type to the Python standard library](https://peps.python.org/pep-0435/) |  |
-| [Enum HOWTO](https://docs.python.org/3/howto/enum.html) |  |
+| [Enum HOWTO](https://docs.python.org/3/howto/enum.html) | 4 |
 | [pickle - Python object serializatio](https://docs.python.org/3/library/pickle.html) |  |
 | [PEP 574 - Pickle protocol 5 with out-of-band data](https://peps.python.org/pep-0574/) |  |
 
