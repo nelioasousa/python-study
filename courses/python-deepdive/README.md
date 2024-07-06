@@ -9,4 +9,4 @@ The course videos are very good, with high sound quality, providing additional i
 - [x] Part 1: Functional
 - [ ] Part 2: Iterators and Generators
 - [ ] Part 3: Dictionaries, Sets, JSON
-- [ ] Part 4: OOP
+- [x] Part 4: OOP
